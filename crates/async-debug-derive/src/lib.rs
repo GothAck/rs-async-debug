@@ -4,26 +4,30 @@ use std::collections::HashMap;
 
 use bae::FromAttributes;
 use indexmap::IndexMap;
-use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote, ToTokens};
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::{format_ident, quote};
 use syn::{
-    parse2, Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, Type, Visibility,
+    parse2, Data, DataStruct, DeriveInput, Error, Expr, Field, Fields, FieldsNamed, Type, Visibility,
 };
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    async_debug_impl(input.into()).into()
+    match async_debug_impl(input.into()) {
+        Ok(output) => output.into(),
+        Err(err) => err.to_compile_error().into(),
+    }
 }
 
-fn async_debug_impl(input: TokenStream) -> TokenStream {
-    let input: DeriveInput = parse2(input).unwrap();
+fn async_debug_impl(input: TokenStream) -> Result<TokenStream, Error> {
+    let input: DeriveInput = parse2(input)?;
 
     match &input.data {
         Data::Struct(DataStruct { fields, .. }) => match fields {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
                 let fields = fields.iter().cloned().collect();
 
-                AsyncDebugStructNamed::new(&input, fields).to_token_stream()
+                AsyncDebugStructNamed::new(&input, fields)?
+                    .to_token_stream()
             }
             Fields::Unit => {
                 panic!("unit structs are not supported");
@@ -44,30 +48,37 @@ fn async_debug_impl(input: TokenStream) -> TokenStream {
 struct AsyncDebugStructNamed {
     vis: Visibility,
     ident: Ident,
-    fields: Vec<Field>,
+    fields: IndexMap<Ident, Field>,
 }
 
 type StructGenerics = IndexMap<Ident, (Ident, TokenStream)>;
 type FieldsTs = HashMap<Ident, TokenStream>;
 
 impl AsyncDebugStructNamed {
-    pub fn new(input: &DeriveInput, fields: Vec<Field>) -> Self {
-        Self {
+    pub fn new(input: &DeriveInput, fields: Vec<Field>) -> Result<Self, Error> {
+        let fields = fields.iter()
+            .map(|field| {
+                let ident = field.ident.clone()
+                    .ok_or_else(|| Error::new(Span::call_site(), "Missing field ident"))?;
+
+                Ok((ident, field.clone()))
+            })
+            .collect::<Result<IndexMap<_, _>, Error>>()?;
+
+        Ok(Self {
             vis: input.vis.clone(),
             ident: input.ident.clone(),
             fields,
-        }
+        })
     }
 
-    fn get_fields(&self) -> (StructGenerics, FieldsTs) {
+    fn get_fields(&self) -> Result<(StructGenerics, FieldsTs), Error> {
         let mut struct_generics: StructGenerics = IndexMap::new();
         let mut fields_ts = HashMap::new();
-        for field in &self.fields {
+        for (ident, field) in &self.fields {
             let Field {
-                attrs, ident, ty, ..
+                attrs, ty, ..
             } = field;
-
-            let ident = ident.as_ref().unwrap();
 
             struct_generics.insert(
                 ident.clone(),
@@ -75,7 +86,7 @@ impl AsyncDebugStructNamed {
             );
             let mut custom_type = false;
 
-            if let Some(debug_attribute) = AsyncDebug::try_from_attributes(attrs).unwrap() {
+            if let Some(debug_attribute) = AsyncDebug::try_from_attributes(attrs)? {
                 if let Some(ty) = debug_attribute.ty {
                     struct_generics.insert(
                         ident.clone(),
@@ -112,7 +123,7 @@ impl AsyncDebugStructNamed {
             }
         }
 
-        (struct_generics, fields_ts)
+        Ok((struct_generics, fields_ts))
     }
 
     fn get_generics(&self, struct_generics: StructGenerics) -> (Vec<Ident>, Vec<TokenStream>) {
@@ -125,9 +136,8 @@ impl AsyncDebugStructNamed {
 
     fn get_async_fields(&self) -> Vec<TokenStream> {
         self.fields
-            .iter()
-            .map(|field| {
-                let ident = field.ident.as_ref().unwrap();
+            .keys()
+            .map(|ident| {
                 let ident_ty = format_ident!("T_{}", ident);
 
                 quote! { #ident: #ident_ty, }
@@ -137,10 +147,8 @@ impl AsyncDebugStructNamed {
 
     fn get_assign_fields(&self, fields_ts: FieldsTs) -> Vec<TokenStream> {
         self.fields
-            .iter()
-            .map(|field| {
-                let ident = field.ident.as_ref().unwrap();
-
+            .keys()
+            .map(|ident| {
                 if let Some(ts) = fields_ts.get(ident) {
                     quote! { #ident: #ts, }
                 } else {
@@ -149,11 +157,9 @@ impl AsyncDebugStructNamed {
             })
             .collect()
     }
-}
 
-impl ToTokens for AsyncDebugStructNamed {
-    fn to_tokens(&self, ts: &mut TokenStream) {
-        let (struct_generics, fields_ts) = self.get_fields();
+    fn to_token_stream(&self) -> Result<TokenStream, Error> {
+        let (struct_generics, fields_ts) = self.get_fields()?;
         let (struct_generic_names, struct_generic_types) = self.get_generics(struct_generics);
         let struct_async_fields = self.get_async_fields();
         let assign_fields = self.get_assign_fields(fields_ts);
@@ -162,7 +168,7 @@ impl ToTokens for AsyncDebugStructNamed {
         let ident = &self.ident;
         let debug_struct_ident = format_ident!("{}Debug", self.ident);
 
-        ts.extend(
+        Ok(
             quote! {
                 impl AsyncDebug for #ident {}
 
@@ -181,7 +187,7 @@ impl ToTokens for AsyncDebugStructNamed {
                     #(#struct_async_fields)*
                 }
             }
-        );
+        )
     }
 }
 
