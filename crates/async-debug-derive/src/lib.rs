@@ -4,10 +4,13 @@ use std::collections::HashMap;
 
 use bae::FromAttributes;
 use indexmap::IndexMap;
-use proc_macro2::{TokenStream, Ident};
-use quote::{quote, format_ident, ToTokens};
+use proc_macro2::{Ident, TokenStream};
+use quote::{format_ident, quote, ToTokens};
 
-use syn::{parse_macro_input, Expr, DeriveInput, Data, DataStruct, Fields, FieldsNamed, Field, Type, Visibility};
+use syn::{
+    parse_macro_input, Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, Type,
+    Visibility,
+};
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -18,14 +21,11 @@ pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 fn async_debug_impl(input: DeriveInput) -> TokenStream {
     match &input.data {
-        Data::Struct(DataStruct {fields, ..}) => match fields {
+        Data::Struct(DataStruct { fields, .. }) => match fields {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
-                let fields = fields.iter()
-                    .cloned()
-                    .collect();
+                let fields = fields.iter().cloned().collect();
 
-                AsyncDebugStructNamed::new(&input, fields)
-                    .to_token_stream()
+                AsyncDebugStructNamed::new(&input, fields).to_token_stream()
             }
             Fields::Unit => {
                 panic!("unit structs are not supported");
@@ -33,7 +33,7 @@ fn async_debug_impl(input: DeriveInput) -> TokenStream {
             Fields::Unnamed(..) => {
                 panic!("unnamed field structs are not supported");
             }
-        }
+        },
         Data::Enum(..) => {
             panic!("enums are not supported");
         }
@@ -76,13 +76,19 @@ impl AsyncDebugStructNamed {
 
             let ident = ident.as_ref().unwrap();
 
-            struct_generics.insert(ident.clone(), (format_ident!("T_{}", ident), quote! { #ty }));
+            struct_generics.insert(
+                ident.clone(),
+                (format_ident!("T_{}", ident), quote! { #ty }),
+            );
             let mut custom_type = false;
 
             if let Some(debug_attribute) = AsyncDebug::try_from_attributes(attrs).unwrap() {
                 if let Some(ty) = debug_attribute.ty {
                     // fields_ty.insert(ident.clone(), ty.clone());
-                    struct_generics.insert(ident.clone(), (format_ident!("T_{}", ident), quote! { #ty }));
+                    struct_generics.insert(
+                        ident.clone(),
+                        (format_ident!("T_{}", ident), quote! { #ty }),
+                    );
                     custom_type = true;
                 } else {
                     // fields_ty.insert(ident.clone(), ty.clone());
@@ -119,14 +125,16 @@ impl AsyncDebugStructNamed {
     }
 
     fn get_generics(&self, struct_generics: StructGenerics) -> (Vec<Ident>, Vec<TokenStream>) {
-        struct_generics.values()
+        struct_generics
+            .values()
             .cloned()
             .map(|(a, b)| (a, b))
             .unzip()
     }
 
     fn get_async_fields(&self) -> Vec<TokenStream> {
-        self.fields.iter()
+        self.fields
+            .iter()
             .map(|field| {
                 let ident = field.ident.as_ref().unwrap();
                 let ident_ty = format_ident!("T_{}", ident);
@@ -137,7 +145,8 @@ impl AsyncDebugStructNamed {
     }
 
     fn get_assign_fields(&self, fields_ts: FieldsTs) -> Vec<TokenStream> {
-        self.fields.iter()
+        self.fields
+            .iter()
             .map(|field| {
                 let ident = field.ident.as_ref().unwrap();
 

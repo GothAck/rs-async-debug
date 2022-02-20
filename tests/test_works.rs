@@ -1,5 +1,5 @@
-use async_debug::{AsyncDebug};
-use tokio::sync::{RwLock, Mutex};
+use async_debug::AsyncDebug;
+use tokio::sync::{Mutex, RwLock};
 
 #[tokio::test]
 async fn test_works() {
