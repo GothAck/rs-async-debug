@@ -1,0 +1,14 @@
+[package]
+name = "async-debug-derive"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# attribute-derive = "0.2"
+bae = "0.1"
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = "1.0"
+
+[lib]
+proc-macro = true
