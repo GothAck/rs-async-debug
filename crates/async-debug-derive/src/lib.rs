@@ -30,17 +30,17 @@ fn async_debug_impl(input: TokenStream) -> Result<TokenStream, Error> {
                 AsyncDebugStructNamed::new(&input, fields)?.to_token_stream()
             }
             Fields::Unit => {
-                panic!("unit structs are not supported");
+                Err(Error::new(Span::call_site(), "unit structs are not supported"))
             }
             Fields::Unnamed(..) => {
-                panic!("unnamed field structs are not supported");
+                Err(Error::new(Span::call_site(), "unnamed field structs are not supported"))
             }
         },
         Data::Enum(..) => {
-            panic!("enums are not supported");
+            Err(Error::new(Span::call_site(), "enums are not supported"))
         }
         Data::Union(..) => {
-            panic!("unions are not supported");
+            Err(Error::new(Span::call_site(), "unions are not supported"))
         }
     }
 }
@@ -103,7 +103,7 @@ impl AsyncDebugStructNamed {
                 }
 
                 if debug_attribute.copy.is_some() && debug_attribute.clone.is_some() {
-                    panic!("copy and clone are exclusive");
+                    return Err(Error::new_spanned(ident, "copy and clone are exclusive"));
                 }
 
                 if debug_attribute.copy.is_some() {

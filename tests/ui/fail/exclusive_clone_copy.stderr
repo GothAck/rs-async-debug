@@ -1,10 +1,8 @@
-error: proc-macro derive panicked
- --> tests/ui/fail/exclusive_clone_copy.rs:4:17
+error: copy and clone are exclusive
+ --> tests/ui/fail/exclusive_clone_copy.rs:9:5
   |
-4 | #[derive(Debug, AsyncDebug)]
-  |                 ^^^^^^^^^^
-  |
-  = help: message: copy and clone are exclusive
+9 |     rw_lock: RwLock<Vec<String>>,
+  |     ^^^^^^^
 
 error[E0599]: no method named `async_debug` found for struct `Mixed` in the current scope
   --> tests/ui/fail/exclusive_clone_copy.rs:27:31
