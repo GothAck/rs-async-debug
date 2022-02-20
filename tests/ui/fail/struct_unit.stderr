@@ -1,0 +1,16 @@
+error: unit structs are not supported
+ --> tests/ui/fail/struct_unit.rs:3:17
+  |
+3 | #[derive(Debug, AsyncDebug)]
+  |                 ^^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `AsyncDebug` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0599]: no method named `async_debug` found for struct `Mixed` in the current scope
+  --> tests/ui/fail/struct_unit.rs:11:31
+   |
+4  | struct Mixed;
+   | ------------- method `async_debug` not found for this
+...
+11 |         format!("{:?}", mixed.async_debug().await),
+   |                               ^^^^^^^^^^^ method not found in `Mixed`
