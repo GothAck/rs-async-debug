@@ -67,7 +67,6 @@ impl AsyncDebugStructNamed {
         for field in &self.fields {
             let Field {
                 attrs,
-                vis: _,
                 ident,
                 ty,
                 ..
@@ -83,14 +82,11 @@ impl AsyncDebugStructNamed {
 
             if let Some(debug_attribute) = AsyncDebug::try_from_attributes(attrs).unwrap() {
                 if let Some(ty) = debug_attribute.ty {
-                    // fields_ty.insert(ident.clone(), ty.clone());
                     struct_generics.insert(
                         ident.clone(),
                         (format_ident!("T_{}", ident), quote! { #ty }),
                     );
                     custom_type = true;
-                } else {
-                    // fields_ty.insert(ident.clone(), ty.clone());
                 }
 
                 let mut field_ts = quote! { self.#ident };
@@ -172,7 +168,7 @@ impl ToTokens for AsyncDebugStructNamed {
 
         ts.extend(
             quote! {
-                impl async_debug::AsyncDebug for #ident {}
+                impl AsyncDebug for #ident {}
 
                 impl #ident {
                     #vis async fn async_debug(&self) -> #debug_struct_ident<#(#struct_generic_types),*> {
