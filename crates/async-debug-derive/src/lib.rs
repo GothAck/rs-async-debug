@@ -7,7 +7,8 @@ use indexmap::IndexMap;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{
-    parse2, Data, DataStruct, DeriveInput, Error, Expr, Field, Fields, FieldsNamed, Type, Visibility,
+    parse2, Data, DataStruct, DeriveInput, Error, Expr, Field, Fields, FieldsNamed, Type,
+    Visibility,
 };
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
@@ -26,8 +27,7 @@ fn async_debug_impl(input: TokenStream) -> Result<TokenStream, Error> {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
                 let fields = fields.iter().cloned().collect();
 
-                AsyncDebugStructNamed::new(&input, fields)?
-                    .to_token_stream()
+                AsyncDebugStructNamed::new(&input, fields)?.to_token_stream()
             }
             Fields::Unit => {
                 panic!("unit structs are not supported");
@@ -56,9 +56,12 @@ type FieldsTs = HashMap<Ident, TokenStream>;
 
 impl AsyncDebugStructNamed {
     pub fn new(input: &DeriveInput, fields: Vec<Field>) -> Result<Self, Error> {
-        let fields = fields.iter()
+        let fields = fields
+            .iter()
             .map(|field| {
-                let ident = field.ident.clone()
+                let ident = field
+                    .ident
+                    .clone()
                     .ok_or_else(|| Error::new(Span::call_site(), "Missing field ident"))?;
 
                 Ok((ident, field.clone()))
@@ -76,9 +79,7 @@ impl AsyncDebugStructNamed {
         let mut struct_generics: StructGenerics = IndexMap::new();
         let mut fields_ts = HashMap::new();
         for (ident, field) in &self.fields {
-            let Field {
-                attrs, ty, ..
-            } = field;
+            let Field { attrs, ty, .. } = field;
 
             struct_generics.insert(
                 ident.clone(),
@@ -168,26 +169,24 @@ impl AsyncDebugStructNamed {
         let ident = &self.ident;
         let debug_struct_ident = format_ident!("{}Debug", self.ident);
 
-        Ok(
-            quote! {
-                impl AsyncDebug for #ident {}
+        Ok(quote! {
+            impl AsyncDebug for #ident {}
 
-                impl #ident {
-                    #vis async fn async_debug(&self) -> #debug_struct_ident<#(#struct_generic_types),*> {
-                        #debug_struct_ident {
-                            #(#assign_fields)*
-                        }
+            impl #ident {
+                #vis async fn async_debug(&self) -> #debug_struct_ident<#(#struct_generic_types),*> {
+                    #debug_struct_ident {
+                        #(#assign_fields)*
                     }
                 }
-
-                #[derive(Debug)]
-                #[allow(dead_code)]
-                #[allow(non_camel_case_types)]
-                #vis struct #debug_struct_ident<#(#struct_generic_names),*> {
-                    #(#struct_async_fields)*
-                }
             }
-        )
+
+            #[derive(Debug)]
+            #[allow(dead_code)]
+            #[allow(non_camel_case_types)]
+            #vis struct #debug_struct_ident<#(#struct_generic_names),*> {
+                #(#struct_async_fields)*
+            }
+        })
     }
 }
 
