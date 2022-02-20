@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use bae::FromAttributes;
 use indexmap::IndexMap;
 use proc_macro2::{TokenStream, Ident};
-use quote::{quote, format_ident};
+use quote::{quote, format_ident, ToTokens};
 
 use syn::{parse_macro_input, Expr, DeriveInput, Data, DataStruct, Fields, FieldsNamed, Field, Type, Visibility};
 
@@ -25,7 +25,7 @@ fn async_debug_impl(input: DeriveInput) -> TokenStream {
                     .collect();
 
                 AsyncDebugStructNamed::new(&input, fields)
-                    .gen()
+                    .to_token_stream()
             }
             Fields::Unit => {
                 panic!("unit structs are not supported");
@@ -149,10 +149,10 @@ impl AsyncDebugStructNamed {
             })
             .collect()
     }
+}
 
-    pub fn gen(&self) -> TokenStream {
-        // let mut async_fields = vec![];
-
+impl ToTokens for AsyncDebugStructNamed {
+    fn to_tokens(&self, ts: &mut TokenStream) {
         let (struct_generics, fields_ts) = self.get_fields();
         let (struct_generic_names, struct_generic_types) = self.get_generics(struct_generics);
         let struct_async_fields = self.get_async_fields();
@@ -162,24 +162,26 @@ impl AsyncDebugStructNamed {
         let ident = &self.ident;
         let debug_struct_ident = format_ident!("{}Debug", self.ident);
 
-        quote! {
-            impl async_debug::AsyncDebug for #ident {}
+        ts.extend(
+            quote! {
+                impl async_debug::AsyncDebug for #ident {}
 
-            impl #ident {
-                #vis async fn async_debug(&self) -> #debug_struct_ident<#(#struct_generic_types),*> {
-                    #debug_struct_ident {
-                        #(#assign_fields)*
+                impl #ident {
+                    #vis async fn async_debug(&self) -> #debug_struct_ident<#(#struct_generic_types),*> {
+                        #debug_struct_ident {
+                            #(#assign_fields)*
+                        }
                     }
                 }
-            }
 
-            #[derive(Debug)]
-            #[allow(dead_code)]
-            #[allow(non_camel_case_types)]
-            #vis struct #debug_struct_ident<#(#struct_generic_names),*> {
-                #(#struct_async_fields)*
+                #[derive(Debug)]
+                #[allow(dead_code)]
+                #[allow(non_camel_case_types)]
+                #vis struct #debug_struct_ident<#(#struct_generic_names),*> {
+                    #(#struct_async_fields)*
+                }
             }
-        }
+        );
     }
 }
 
