@@ -96,11 +96,13 @@ impl AsyncDebugStructNamed {
                     field_ts = quote! { #parse_expr(&#field_ts).await };
                 }
 
+                if debug_attribute.copy.is_some() && debug_attribute.clone.is_some() {
+                    panic!("copy and clone are exclusive");
+                }
+
                 if debug_attribute.copy.is_some() {
-                    // TODO: Exclusive
                     field_ts = quote! { *#field_ts };
                 } else if debug_attribute.clone.is_some() {
-                    // TODO: Exclusive
                     field_ts = quote! { #field_ts.clone() };
                 }
 
