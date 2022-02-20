@@ -12,8 +12,6 @@ use syn::{
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    // let input = parse_macro_input!(input as DeriveInput);
-
     async_debug_impl(input.into()).into()
 }
 
@@ -64,7 +62,6 @@ impl AsyncDebugStructNamed {
     fn get_fields(&self) -> (StructGenerics, FieldsTs) {
         let mut struct_generics: StructGenerics = IndexMap::new();
         let mut fields_ts = HashMap::new();
-        // let mut fields_ty = HashMap::new();
         for field in &self.fields {
             let Field {
                 attrs, ident, ty, ..
@@ -90,7 +87,6 @@ impl AsyncDebugStructNamed {
                 let mut field_ts = quote! { self.#ident };
 
                 if let Some(parse_expr) = debug_attribute.parse {
-                    // async_fields.push(ident.clone());
                     field_ts = quote! { #parse_expr(&#field_ts).await };
                 }
 
