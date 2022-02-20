@@ -6,7 +6,6 @@ use bae::FromAttributes;
 use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
-
 use syn::{
     parse_macro_input, Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, Type,
     Visibility,
