@@ -1,20 +1,20 @@
 use async_debug::AsyncDebug;
 use tokio::sync::{Mutex, RwLock};
 
-#[tokio::test]
-async fn test_works() {
-    #[derive(Debug, AsyncDebug)]
-    struct Mixed {
-        string: String,
-        integer: u64,
-        #[async_debug(parse = RwLock::read, clone, ty = Vec<String>)]
-        rw_lock: RwLock<Vec<String>>,
-        #[async_debug(parse = Mutex::lock, clone, ty = Vec<u64>)]
-        mutex: Mutex<Vec<u64>>,
-        #[async_debug(parse = Mutex::lock, copy, ty = u128)]
-        mutex_u128: Mutex<u128>,
-    }
+#[derive(Debug, AsyncDebug)]
+struct Mixed {
+    string: String,
+    integer: u64,
+    #[async_debug(parse = RwLock::read, clone, copy, ty = Vec<String>)]
+    rw_lock: RwLock<Vec<String>>,
+    #[async_debug(parse = Mutex::lock, clone, ty = Vec<u64>)]
+    mutex: Mutex<Vec<u64>>,
+    #[async_debug(parse = Mutex::lock, copy, ty = u128)]
+    mutex_u128: Mutex<u128>,
+}
 
+#[tokio::main]
+async fn main() {
     let mixed = Mixed {
         string: "test".into(),
         integer: 42,

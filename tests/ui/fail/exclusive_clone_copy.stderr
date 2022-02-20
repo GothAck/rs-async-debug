@@ -1,0 +1,16 @@
+error: proc-macro derive panicked
+ --> tests/ui/fail/exclusive_clone_copy.rs:4:17
+  |
+4 | #[derive(Debug, AsyncDebug)]
+  |                 ^^^^^^^^^^
+  |
+  = help: message: copy and clone are exclusive
+
+error[E0599]: no method named `async_debug` found for struct `Mixed` in the current scope
+  --> tests/ui/fail/exclusive_clone_copy.rs:27:31
+   |
+5  | struct Mixed {
+   | ------------ method `async_debug` not found for this
+...
+27 |         format!("{:?}", mixed.async_debug().await),
+   |                               ^^^^^^^^^^^ method not found in `Mixed`
