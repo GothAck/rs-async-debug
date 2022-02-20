@@ -61,7 +61,7 @@ impl AsyncDebugStructNamed {
         }
     }
 
-    fn get_fields(&mut self) -> (StructGenerics, FieldsTs) {
+    fn get_fields(&self) -> (StructGenerics, FieldsTs) {
         let mut struct_generics: StructGenerics = IndexMap::new();
         let mut fields_ts = HashMap::new();
         // let mut fields_ty = HashMap::new();
@@ -150,7 +150,7 @@ impl AsyncDebugStructNamed {
             .collect()
     }
 
-    pub fn gen(&mut self) -> TokenStream {
+    pub fn gen(&self) -> TokenStream {
         // let mut async_fields = vec![];
 
         let (struct_generics, fields_ts) = self.get_fields();
