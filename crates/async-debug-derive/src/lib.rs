@@ -16,7 +16,7 @@ pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 fn async_debug_impl(input: TokenStream) -> TokenStream {
-    let input = parse2::<DeriveInput>(input).unwrap();
+    let input: DeriveInput = parse2(input).unwrap();
 
     match &input.data {
         Data::Struct(DataStruct { fields, .. }) => match fields {
