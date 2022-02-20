@@ -7,18 +7,19 @@ use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
-    parse_macro_input, Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, Type,
-    Visibility,
+    parse2, Data, DataStruct, DeriveInput, Expr, Field, Fields, FieldsNamed, Type, Visibility,
 };
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as DeriveInput);
+    // let input = parse_macro_input!(input as DeriveInput);
 
-    async_debug_impl(input).into()
+    async_debug_impl(input.into()).into()
 }
 
-fn async_debug_impl(input: DeriveInput) -> TokenStream {
+fn async_debug_impl(input: TokenStream) -> TokenStream {
+    let input = parse2::<DeriveInput>(input).unwrap();
+
     match &input.data {
         Data::Struct(DataStruct { fields, .. }) => match fields {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
@@ -66,10 +67,7 @@ impl AsyncDebugStructNamed {
         // let mut fields_ty = HashMap::new();
         for field in &self.fields {
             let Field {
-                attrs,
-                ident,
-                ty,
-                ..
+                attrs, ident, ty, ..
             } = field;
 
             let ident = ident.as_ref().unwrap();
