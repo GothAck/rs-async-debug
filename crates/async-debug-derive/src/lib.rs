@@ -21,7 +21,7 @@ fn async_debug_impl(input: DeriveInput) -> TokenStream {
         Data::Struct(DataStruct {fields, ..}) => match fields {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
                 let fields = fields.iter()
-                    .map(|f| f.clone())
+                    .cloned()
                     .collect();
 
                 AsyncDebugStructNamed::new(&input, fields)
