@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse2, DeriveInput, Error, Field, GenericArgument, ImplGenerics, Type, TypeGenerics,
@@ -18,20 +18,21 @@ pub struct AsyncDebugStructNamed<'a> {
 }
 
 impl<'a> AsyncDebugStructNamed<'a> {
-    pub fn new(input: &'a DeriveInput, fields: Vec<Field>) -> Result<Self> {
+    pub fn new(input: &'a DeriveInput, fields: Vec<&Field>) -> Result<Self> {
+        let (generics_impl, generics_ty, where_clause) = input.generics.split_for_impl();
+
         let fields = fields
-            .iter()
+            .into_iter()
+            .cloned()
             .map(|field| {
                 let ident = field
                     .ident
                     .clone()
-                    .ok_or_else(|| Error::new(Span::call_site(), "Missing field ident"))?;
+                    .ok_or_else(|| Error::new_call_site("Missing field ident"))?;
 
-                Ok((ident, AsyncDebugField::new(field.clone(), None)?))
+                Ok((ident, AsyncDebugField::new(field, None)?))
             })
             .collect::<Result<IndexMap<_, _>>>()?;
-
-        let (generics_impl, generics_ty, where_clause) = input.generics.split_for_impl();
 
         Ok(Self {
             vis: input.vis.clone(),
