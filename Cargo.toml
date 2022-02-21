@@ -14,3 +14,12 @@ tokio = { version = "1", features = ["full"] }
 trybuild = "1.0"
 
 [workspace]
+members = [
+  ".",
+  "crates/async-debug-derive",
+  # "tests/ui",
+  ]
+default-members = [
+  ".",
+  "crates/async-debug-derive",
+  ]

@@ -1,0 +1,46 @@
+[package]
+name = "async-debug-ui-tests"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-debug = { path = "../.." }
+tokio = { version = "1", features = ["full"] }
+
+[dev-dependencies]
+trybuild = "1.0"
+
+[[bin]]
+name = "fail_enum"
+path = "fail/enum.rs"
+
+[[bin]]
+name = "fail_exclusive_clone_copy"
+path = "fail/exclusive_clone_copy.rs"
+
+[[bin]]
+name = "fail_struct_unit"
+path = "fail/struct_unit.rs"
+
+[[bin]]
+name = "fail_struct_unnamed"
+path = "fail/struct_unnamed.rs"
+
+[[bin]]
+name = "fail_union"
+path = "fail/union.rs"
+
+[[bin]]
+name = "pass_basic"
+path = "pass/basic.rs"
+
+[[bin]]
+name = "pass_generics"
+path = "pass/generics.rs"
+
+[[bin]]
+name = "pass_rust_generics"
+path = "pass/rust_generics.rs"
+
