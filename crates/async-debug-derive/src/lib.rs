@@ -11,6 +11,8 @@ use syn::{
     Visibility,
 };
 
+type Result<T> = std::result::Result<T, Error>;
+
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     match async_debug_impl(input.into()) {
@@ -19,7 +21,7 @@ pub fn async_debug(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
 }
 
-fn async_debug_impl(input: TokenStream) -> Result<TokenStream, Error> {
+fn async_debug_impl(input: TokenStream) -> Result<TokenStream> {
     let input: DeriveInput = parse2(input)?;
 
     match &input.data {
@@ -55,7 +57,7 @@ type StructGenerics = IndexMap<Ident, (Ident, TokenStream)>;
 type FieldsTs = HashMap<Ident, TokenStream>;
 
 impl AsyncDebugStructNamed {
-    pub fn new(input: &DeriveInput, fields: Vec<Field>) -> Result<Self, Error> {
+    pub fn new(input: &DeriveInput, fields: Vec<Field>) -> Result<Self> {
         let fields = fields
             .iter()
             .map(|field| {
@@ -66,7 +68,7 @@ impl AsyncDebugStructNamed {
 
                 Ok((ident, field.clone()))
             })
-            .collect::<Result<IndexMap<_, _>, Error>>()?;
+            .collect::<Result<IndexMap<_, _>>>()?;
 
         Ok(Self {
             vis: input.vis.clone(),
@@ -75,7 +77,7 @@ impl AsyncDebugStructNamed {
         })
     }
 
-    fn get_fields(&self) -> Result<(StructGenerics, FieldsTs), Error> {
+    fn get_fields(&self) -> Result<(StructGenerics, FieldsTs)> {
         let mut struct_generics: StructGenerics = IndexMap::new();
         let mut fields_ts = HashMap::new();
         for (ident, field) in &self.fields {
@@ -159,7 +161,7 @@ impl AsyncDebugStructNamed {
             .collect()
     }
 
-    fn to_token_stream(&self) -> Result<TokenStream, Error> {
+    fn to_token_stream(&self) -> Result<TokenStream> {
         let (struct_generics, fields_ts) = self.get_fields()?;
         let (struct_generic_names, struct_generic_types) = self.get_generics(struct_generics);
         let struct_async_fields = self.get_async_fields();
