@@ -1,13 +1,14 @@
 mod common;
+mod enums;
 mod struct_named;
 mod zip_result;
 
 extern crate proc_macro;
 
 use proc_macro2::{Span, TokenStream};
-use syn::{parse2, Data, DataStruct, DeriveInput, Error, Fields, FieldsNamed};
+use syn::{parse2, Data, DataEnum, DataStruct, DeriveInput, Error, Fields, FieldsNamed};
 
-use self::struct_named::AsyncDebugStructNamed;
+use self::{enums::AsyncDebugEnum, struct_named::AsyncDebugStructNamed};
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -38,7 +39,11 @@ fn async_debug_impl(input: TokenStream) -> Result<TokenStream> {
                 "unnamed field structs are not supported",
             )),
         },
-        Data::Enum(..) => Err(Error::new(Span::call_site(), "enums are not supported")),
+        Data::Enum(DataEnum { variants, .. }) => {
+            let variants = variants.iter().cloned().collect();
+
+            AsyncDebugEnum::new(&input, variants)?.to_token_stream()
+        }
         Data::Union(..) => Err(Error::new(Span::call_site(), "unions are not supported")),
     }
 }

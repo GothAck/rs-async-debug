@@ -6,7 +6,7 @@ use syn::{
     Visibility, WhereClause,
 };
 
-use crate::{common::AsyncDebugField, zip_result::ZipResult, Result};
+use crate::{common::*, zip_result::ZipResult, Result};
 
 pub struct AsyncDebugStructNamed<'a> {
     vis: Visibility,
@@ -27,7 +27,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
                     .clone()
                     .ok_or_else(|| Error::new(Span::call_site(), "Missing field ident"))?;
 
-                Ok((ident, AsyncDebugField::new(field.clone())?))
+                Ok((ident, AsyncDebugField::new(field.clone(), None)?))
             })
             .collect::<Result<IndexMap<_, _>>>()?;
 
@@ -43,7 +43,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
         })
     }
 
-    fn get_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
+    fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
         let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
             .fields
             .values()
@@ -75,12 +75,12 @@ impl<'a> AsyncDebugStructNamed<'a> {
     fn get_fields_assign(&self) -> Result<Vec<TokenStream>> {
         self.fields
             .values()
-            .map(|field| field.to_token_stream())
+            .map(|field| field.to_token_stream(Some(quote! { self. })))
             .collect()
     }
 
     pub fn to_token_stream(&self) -> Result<TokenStream> {
-        let (struct_new_generics_names, struct_new_generics) = self.get_generics()?;
+        let (new_generics_names, new_generics) = self.get_new_generics()?;
         let fields_type = self.get_fields_type();
         let fields_assign = self.get_fields_assign()?;
 
@@ -100,7 +100,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
         let ts_impl_ident = quote! {
             #[automatically_derived]
             impl #generics_impl #ident #generics_ty #where_clause {
-                #vis async fn async_debug (&self) -> #debug_struct_ident <#(#struct_new_generics),*>
+                #vis async fn async_debug (&self) -> #debug_struct_ident <#(#new_generics),*>
                 #where_clause
                 {
                     #debug_struct_ident {
@@ -115,7 +115,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
             #[allow(dead_code)]
             #[allow(non_camel_case_types)]
             #[automatically_derived]
-            #vis struct #debug_struct_ident <#(#struct_new_generics_names),*>
+            #vis struct #debug_struct_ident <#(#new_generics_names),*>
             {
                 #(#fields_type)*
             }

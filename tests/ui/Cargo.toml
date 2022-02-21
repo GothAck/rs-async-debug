@@ -13,10 +13,6 @@ tokio = { version = "1", features = ["full"] }
 trybuild = "1.0"
 
 [[bin]]
-name = "fail_enum"
-path = "fail/enum.rs"
-
-[[bin]]
 name = "fail_exclusive_clone_copy"
 path = "fail/exclusive_clone_copy.rs"
 
@@ -35,6 +31,10 @@ path = "fail/union.rs"
 [[bin]]
 name = "pass_basic"
 path = "pass/basic.rs"
+
+[[bin]]
+name = "pass_enum"
+path = "pass/enum.rs"
 
 [[bin]]
 name = "pass_generics"
