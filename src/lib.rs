@@ -49,6 +49,7 @@
 //!     "MyStructAsyncDebug { my_value: \"Hello, world!\" }",
 //! );
 //! # }
+//! ```
 pub use async_debug_derive::AsyncDebug;
 
 pub trait AsyncDebug {}

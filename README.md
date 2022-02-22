@@ -4,6 +4,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 <!-- cargo-sync-readme start -->
 
+# Async Debug
 The `async-debug` crate makes it easy to debug structs and enums containing
 values that require an async call to render.
 
@@ -16,10 +17,8 @@ struct MyStruct {
     my_value: RwLock<String>
 }
 
-# fn main() {
 let my_struct = MyStruct { my_value: RwLock::from("Hello, world!".to_string()) };
 println!("{:?}", my_struct );
-# }
 ```
 
 Prints something like:
@@ -46,13 +45,11 @@ struct MyStruct {
     my_value: RwLock<String>
 }
 
-# #[tokio::main]
-# async fn main() {
 let my_struct = MyStruct { my_value: RwLock::from("Hello, world!".to_string()) };
 assert_eq!(
     format!("{:?}", my_struct.async_debug().await),
     "MyStructAsyncDebug { my_value: \"Hello, world!\" }",
 );
-# }
+```
 
 <!-- cargo-sync-readme end -->
