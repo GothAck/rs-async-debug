@@ -5,7 +5,7 @@ use tokio::sync::{Mutex, RwLock};
 struct Mixed(
     String,
     u64,
-    #[async_debug(parse = RwLock::read, clone, copy, ty = Vec<String>)]
+    #[async_debug(parse = RwLock::read, clone, ty = Vec<String>)]
     RwLock<Vec<String>>,
     #[async_debug(parse = Mutex::lock, clone, ty = Vec<u64>)]
     Mutex<Vec<u64>>,

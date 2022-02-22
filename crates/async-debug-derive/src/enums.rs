@@ -6,7 +6,7 @@ use syn::{
     TypeGenerics, Variant, Visibility, WhereClause,
 };
 
-use crate::{common::*, zip_result::ZipResult, Result};
+use crate::{common::ErrorCallSite, fields::{AsyncDebugField, AsyncDebugFieldIdent}, zip_result::ZipResult, Result};
 
 pub struct AsyncDebugEnum<'a> {
     vis: Visibility,
@@ -149,7 +149,7 @@ impl<'a> AsyncDebugEnum<'a> {
 pub struct AsyncDebugVariant {
     variant: Variant,
     enum_debug_ident: Ident,
-    fields: IndexMap<Ident, AsyncDebugField>,
+    fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
 }
 
 impl AsyncDebugVariant {
@@ -159,16 +159,10 @@ impl AsyncDebugVariant {
                 Fields::Named(FieldsNamed { named: fields, .. }) => fields
                     .iter()
                     .cloned()
-                    .map(|field| {
-                        let ident = field
-                            .ident
-                            .clone()
-                            .ok_or_else(|| Error::new_call_site("Missing field ident"))?;
-
-                        Ok((
-                            ident,
-                            AsyncDebugField::new(field, Some(variant.ident.clone()))?,
-                        ))
+                    .enumerate()
+                    .map(|(index, field)| {
+                        let field = AsyncDebugField::new(field, None, index)?;
+                        Ok((field.ident.clone(), field))
                     })
                     .collect::<Result<IndexMap<_, _>>>()?,
                 Fields::Unit => {
@@ -223,7 +217,7 @@ impl AsyncDebugVariant {
     fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
         let ident = &self.variant.ident;
         let enum_debug_ident = &self.enum_debug_ident;
-        let (field_idents, field_ts): (Vec<&Ident>, Vec<TokenStream>) = self
+        let (field_idents, field_ts): (Vec<&AsyncDebugFieldIdent>, Vec<TokenStream>) = self
             .fields
             .iter()
             .map(|(ident, field)| field.to_token_stream(None).map(|ts| (ident, ts)))

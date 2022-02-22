@@ -2,11 +2,11 @@ use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
-    parse2, DeriveInput, Error, Field, GenericArgument, ImplGenerics, Type, TypeGenerics,
+    parse2, DeriveInput, Field, GenericArgument, ImplGenerics, Type, TypeGenerics,
     Visibility, WhereClause,
 };
 
-use crate::{common::*, zip_result::ZipResult, Result};
+use crate::{fields::{AsyncDebugField, AsyncDebugFieldIdent}, zip_result::ZipResult, Result};
 
 pub struct AsyncDebugStructNamed<'a> {
     vis: Visibility,
@@ -14,7 +14,7 @@ pub struct AsyncDebugStructNamed<'a> {
     generics_impl: ImplGenerics<'a>,
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
-    fields: IndexMap<Ident, AsyncDebugField>,
+    fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
 }
 
 impl<'a> AsyncDebugStructNamed<'a> {
@@ -24,13 +24,10 @@ impl<'a> AsyncDebugStructNamed<'a> {
         let fields = fields
             .into_iter()
             .cloned()
-            .map(|field| {
-                let ident = field
-                    .ident
-                    .clone()
-                    .ok_or_else(|| Error::new_call_site("Missing field ident"))?;
-
-                Ok((ident, AsyncDebugField::new(field, None)?))
+            .enumerate()
+            .map(|(index, field)| {
+                let field = AsyncDebugField::new(field, None, index)?;
+                Ok((field.ident.clone(), field))
             })
             .collect::<Result<IndexMap<_, _>>>()?;
 

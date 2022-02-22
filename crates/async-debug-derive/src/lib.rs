@@ -1,5 +1,6 @@
 mod common;
 mod enums;
+mod fields;
 mod structs;
 mod zip_result;
 
