@@ -31,7 +31,7 @@
 //! Add to cargo.toml:
 //! ```toml
 //! [dependencies]
-//! async-debug = "0.1.2"
+//! async-debug = "0.1.3"
 //! ```
 //!
 //! ```rust
