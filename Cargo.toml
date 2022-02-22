@@ -1,16 +1,22 @@
 [package]
 name = "async-debug"
 version = "0.1.0"
+authors = ["Greg \"GothAck\" Miell <rust@greg.gothack.ninja>"]
+description = "Debug structs and enums containing values that require an async call to render"
+keywords = ["async", "debug", "rwlock", "mutex", "tokio"]
+repository = "https://github.com/GothAck/rs-async-debug"
+documentation = "https://docs.rs/async-debug"
+categories = ["asynchronous", "development-tools::debugging"]
+readme = "README.md"
+license = "MIT"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-async-debug-derive = { path = "crates/async-debug-derive" }
+async-debug-derive = { path = "crates/async-debug-derive", version = "0.1.0" }
 
 [dev-dependencies]
-tokio = { version = "1", features = ["full"] }
-trybuild = "1.0"
+tokio = { version = "~1.17.0", features = ["full"] }
+trybuild = "~1.0.56"
 
 [workspace]
 members = [

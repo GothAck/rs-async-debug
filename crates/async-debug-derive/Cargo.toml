@@ -1,15 +1,22 @@
 [package]
 name = "async-debug-derive"
 version = "0.1.0"
+authors = ["Greg \"GothAck\" Miell <rust@greg.gothack.ninja>"]
+description = "Derive macro for async-debug: Debug structs and enums containing values that require an async call to render"
+keywords = ["async", "debug", "rwlock", "mutex", "tokio"]
+repository = "https://github.com/GothAck/rs-async-debug"
+documentation = "https://docs.rs/async-debug"
+categories = ["asynchronous", "development-tools::debugging"]
+readme = "README.md"
+license = "MIT"
 edition = "2021"
 
 [dependencies]
-# attribute-derive = "0.2"
-bae = "0.1"
-indexmap = "1.8"
-proc-macro2 = "1.0"
-quote = "1.0"
-syn = "1.0"
+bae = "~0.1.7"
+indexmap = "~1.8.0"
+proc-macro2 = "~1.0.36"
+quote = "~1.0.15"
+syn = "~1.0.86"
 
 [lib]
 proc-macro = true
