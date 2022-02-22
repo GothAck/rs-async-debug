@@ -41,6 +41,10 @@ name = "pass_rust_generics"
 path = "pass/rust_generics.rs"
 
 [[bin]]
+name = "pass_skip"
+path = "pass/skip.rs"
+
+[[bin]]
 name = "pass_struct_named"
 path = "pass/struct_named.rs"
 

@@ -20,6 +20,8 @@ pub mod attr_prop {
         pub clone: Option<()>,
         pub copy: Option<()>,
         pub ty: Option<Type>,
+
+        pub skip: Option<()>,
     }
 }
 

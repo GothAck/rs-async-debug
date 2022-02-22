@@ -34,6 +34,7 @@ pub trait AsyncDebugFields {
         let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
             .get_fields()
             .values()
+            .filter(|field| !field.skip)
             .map(|field| field.generic_argument().zip_result(field.ty()))
             .collect::<Result<Vec<_>>>()?
             .into_iter()
@@ -50,6 +51,7 @@ pub trait AsyncDebugFields {
     fn get_fields_type(&self) -> TokenStream {
         self.get_fields()
             .values()
+            .filter(|field| !field.skip)
             .map(|field| {
                 let ident = &field.ident;
                 let generic_argument = field.generic_argument_ident();
@@ -75,6 +77,7 @@ pub trait AsyncDebugFields {
     fn to_token_stream_impl_ident_body(&self, prefix: Option<TokenStream>) -> Result<TokenStream> {
         self.get_fields()
             .values()
+            .filter(|field| !field.skip)
             .map(|field| field.to_token_stream(prefix.clone()))
             .collect()
     }
@@ -85,6 +88,7 @@ pub struct AsyncDebugField {
     pub variant_ident: Option<Ident>,
     pub ident: AsyncDebugFieldIdent,
     pub async_debug: Option<AsyncDebug>,
+    pub skip: bool,
 }
 
 impl AsyncDebugField {
@@ -103,11 +107,22 @@ impl AsyncDebugField {
                 }))
             })?;
 
+        let async_debug = AsyncDebug::try_from_attributes(&field.attrs)?;
+
+        let skip = {
+            if let Some(async_debug) = async_debug {
+                async_debug.skip.is_some()
+            } else {
+                false
+            }
+        };
+
         Ok(Self {
             async_debug: AsyncDebug::try_from_attributes(&field.attrs)?,
             field,
             variant_ident,
             ident,
+            skip,
         })
     }
 

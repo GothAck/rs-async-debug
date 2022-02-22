@@ -110,3 +110,22 @@ fn test_no_or_empty_attrs() {
 
     file.write_all(fmt(output).as_bytes()).unwrap();
 }
+
+#[test]
+fn test_skip() {
+    let mut mint = Mint::new("tests/goldenfiles");
+    let mut file = mint.new_goldenfile("test_skip.rs").unwrap();
+
+    let input = quote! {
+        #[derive(AsyncDebug)]
+        struct Input {
+            test: String,
+            #[async_debug(skip)]
+            skipped: u64,
+        }
+    };
+
+    let output = async_debug_impl(input).unwrap();
+
+    file.write_all(fmt(output).as_bytes()).unwrap();
+}
