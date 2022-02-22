@@ -129,8 +129,20 @@ impl AsyncDebugField {
 
     pub fn to_token_stream(&self, prefix: Option<TokenStream>) -> Result<TokenStream> {
         let ident = &self.ident;
+        let ts_ident = {
+            match ident {
+                AsyncDebugFieldIdent::Ident(_) => ident.clone(),
+                AsyncDebugFieldIdent::Index(index) => {
+                    if self.variant_ident.is_some() {
+                        AsyncDebugFieldIdent::Ident(format_ident!("self_{}", index.index))
+                    } else {
+                        ident.clone()
+                    }
+                },
+            }
+        };
 
-        let mut ts = quote! { #prefix #ident };
+        let mut ts = quote! { #prefix #ts_ident };
 
         if let Some(async_debug) = &self.async_debug {
             if let Some(parse) = &async_debug.parse {

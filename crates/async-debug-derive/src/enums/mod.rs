@@ -1,16 +1,20 @@
+mod named;
+mod unnamed;
+
 use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::{
-    DeriveInput, Error, Fields, FieldsNamed, GenericArgument, ImplGenerics, TypeGenerics, Variant,
-    Visibility, WhereClause,
+    DeriveInput, Error, GenericArgument, ImplGenerics, TypeGenerics, Variant,
+    Visibility, WhereClause, Fields, FieldsNamed, FieldsUnnamed,
 };
 
 use crate::{
-    common::ErrorCallSite,
-    fields::{AsyncDebugFields, AsyncDebugFieldsMap},
-    Result,
+    fields::AsyncDebugFields,
+    Result, common::ErrorCallSite,
 };
+
+use self::{named::AsyncDebugVariantNamed, unnamed::AsyncDebugVariantUnnamed};
 
 pub struct AsyncDebugEnum<'a> {
     vis: Visibility,
@@ -133,71 +137,56 @@ impl<'a> AsyncDebugEnum<'a> {
     }
 }
 
-pub struct AsyncDebugVariant {
-    variant: Variant,
-    enum_debug_ident: Ident,
-    fields: AsyncDebugFieldsMap,
-}
-
-impl AsyncDebugFields for AsyncDebugVariant {
-    fn get_fields(&self) -> &AsyncDebugFieldsMap {
-        &self.fields
-    }
+enum AsyncDebugVariant {
+    Named(AsyncDebugVariantNamed),
+    Unit,
+    Unnamed(AsyncDebugVariantUnnamed),
 }
 
 impl AsyncDebugVariant {
-    fn new(variant: Variant, enum_debug_ident: Ident) -> Result<Self> {
-        let fields = {
-            match &variant.fields {
-                Fields::Named(FieldsNamed { named: fields, .. }) => {
-                    Self::convert_fields(fields.iter().collect(), None)?
-                }
-                Fields::Unit => {
-                    return Err(Error::new_call_site(
-                        "unnamed field enum variants are not supported",
-                    ))
-                }
-                Fields::Unnamed(..) => {
-                    return Err(Error::new_call_site(
-                        "unnamed field enum variants are not supported",
-                    ))
-                }
-            }
-        };
+    pub fn new(variant: Variant, enum_debug_ident: Ident) -> Result<Self> {
+        Ok(match &variant.fields {
+            Fields::Named(FieldsNamed { named: fields, .. }) => {
+                let fields = fields.iter().cloned().collect::<Vec<_>>();
 
-        Ok(Self {
-            variant,
-            enum_debug_ident,
-            fields,
+                Self::Named(AsyncDebugVariantNamed::new(variant, enum_debug_ident, fields)?)
+            }
+            Fields::Unit => Self::Unit,
+            Fields::Unnamed(FieldsUnnamed {
+                unnamed: fields, ..
+            }) => {
+                let fields = fields.iter().cloned().collect::<Vec<_>>();
+
+                Self::Unnamed(AsyncDebugVariantUnnamed::new(
+                    variant,
+                    enum_debug_ident,
+                    fields,
+                )?)
+            },
         })
+    }
+
+    fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
+        match self {
+            Self::Named(named) => named.get_new_generics(),
+            Self::Unit => Err(Error::new_call_site("unreachable")),
+            Self::Unnamed(unnamed) => unnamed.get_new_generics(),
+        }
     }
 
     fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
-        let ident = &self.variant.ident;
-        let enum_debug_ident = &self.enum_debug_ident;
-        let field_idents = self
-            .fields
-            .keys()
-            .collect::<Vec<_>>();
-
-        let token_stream_impl_ident_body = <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
-
-        Ok(quote! {
-            Self::#ident { #(#field_idents),* } => #enum_debug_ident::#ident {
-                #token_stream_impl_ident_body
-            },
-        })
+        match self {
+            Self::Named(named) => named.to_token_stream_impl_ident_body(),
+            Self::Unit => Err(Error::new_call_site("unreachable")),
+            Self::Unnamed(unnamed) => unnamed.to_token_stream_impl_ident_body(),
+        }
     }
 
-    fn to_token_stream(&self) -> Result<TokenStream> {
-        let ident = &self.variant.ident;
-
-        let fields_type = self.get_fields_type();
-
-        Ok(quote! {
-            #ident {
-                #fields_type
-            },
-        })
+    pub fn to_token_stream(&self) -> Result<TokenStream> {
+        match self {
+            Self::Named(named) => named.to_token_stream(),
+            Self::Unit => Err(Error::new_call_site("unit structs are not supported")),
+            Self::Unnamed(unnamed) => unnamed.to_token_stream(),
+        }
     }
 }
