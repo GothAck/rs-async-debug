@@ -33,6 +33,10 @@ name = "pass_enum_unnamed"
 path = "pass/enum_unnamed.rs"
 
 [[bin]]
+name = "pass_rust_debug"
+path = "pass/rust_debug.rs"
+
+[[bin]]
 name = "pass_rust_generics"
 path = "pass/rust_generics.rs"
 
