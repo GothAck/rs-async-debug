@@ -76,23 +76,6 @@ impl<'a> AsyncDebugEnum<'a> {
             .collect()
     }
 
-    // fn get_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
-    //     let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
-    //         .fields
-    //         .values()
-    //         .map(|field| field.generic_argument().zip_result(field.ty()))
-    //         .collect::<Result<Vec<_>>>()?
-    //         .into_iter()
-    //         .unzip();
-
-    //     let types = types
-    //         .into_iter()
-    //         .map(|ts| parse2(ts.to_token_stream()))
-    //         .collect::<Result<Vec<_>>>()?;
-
-    //     Ok((names, types))
-    // }
-
     pub fn to_token_stream_impl_ident_bodies(&self) -> Result<TokenStream> {
         self.variants
             .values()
