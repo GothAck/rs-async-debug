@@ -5,13 +5,17 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, IdentFragment, ToTokens};
 use syn::{parse2, spanned::Spanned, Error, Field, GenericArgument, Index, Type};
 
-use crate::{common::AsyncDebug, Result};
+use crate::{common::AsyncDebug, zip_result::ZipResult, Result};
+
+pub type AsyncDebugFieldsMap = IndexMap<AsyncDebugFieldIdent, AsyncDebugField>;
 
 pub trait AsyncDebugFields {
+    fn get_fields(&self) -> &AsyncDebugFieldsMap;
+
     fn convert_fields(
         fields: Vec<&Field>,
         variant_ident: Option<Ident>,
-    ) -> Result<IndexMap<AsyncDebugFieldIdent, AsyncDebugField>> {
+    ) -> Result<AsyncDebugFieldsMap> {
         fields
             .into_iter()
             .cloned()
@@ -21,6 +25,45 @@ pub trait AsyncDebugFields {
                     .map(|field| (field.ident.clone(), field))
             })
             .collect::<Result<IndexMap<_, _>>>()
+    }
+
+    fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
+        let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
+            .get_fields()
+            .values()
+            .map(|field| field.generic_argument().zip_result(field.ty()))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .unzip();
+
+        let types = types
+            .into_iter()
+            .map(|ts| parse2(ts.to_token_stream()))
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok((names, types))
+    }
+
+    fn get_fields_type(&self) -> TokenStream {
+        self.get_fields()
+            .values()
+            .map(|field| {
+                let ident = &field.ident;
+                let generic_argument = field.generic_argument_ident();
+
+                match ident {
+                    AsyncDebugFieldIdent::Ident(ident) => quote! { #ident: #generic_argument, },
+                    AsyncDebugFieldIdent::Index(_) => quote! { #generic_argument, },
+                }
+            })
+            .collect()
+    }
+
+    fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
+        self.get_fields()
+            .values()
+            .map(|field| field.to_token_stream(Some(quote! { self. })))
+            .collect()
     }
 }
 

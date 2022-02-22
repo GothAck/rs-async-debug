@@ -1,14 +1,9 @@
-use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{
-    parse2, DeriveInput, Field, GenericArgument, ImplGenerics, Type, TypeGenerics, Visibility,
-    WhereClause,
-};
+use quote::{format_ident, quote};
+use syn::{DeriveInput, Field, ImplGenerics, TypeGenerics, Visibility, WhereClause};
 
 use crate::{
-    fields::{AsyncDebugField, AsyncDebugFieldIdent, AsyncDebugFields},
-    zip_result::ZipResult,
+    fields::{AsyncDebugFields, AsyncDebugFieldsMap},
     Result,
 };
 
@@ -18,10 +13,14 @@ pub struct AsyncDebugStructNamed<'a> {
     generics_impl: ImplGenerics<'a>,
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
-    fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
+    fields: AsyncDebugFieldsMap,
 }
 
-impl<'a> AsyncDebugFields for AsyncDebugStructNamed<'a> {}
+impl<'a> AsyncDebugFields for AsyncDebugStructNamed<'a> {
+    fn get_fields(&self) -> &AsyncDebugFieldsMap {
+        &self.fields
+    }
+}
 
 impl<'a> AsyncDebugStructNamed<'a> {
     pub fn new(input: &'a DeriveInput, fields: Vec<&Field>) -> Result<Self> {
@@ -39,46 +38,10 @@ impl<'a> AsyncDebugStructNamed<'a> {
         })
     }
 
-    fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
-        let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
-            .fields
-            .values()
-            .map(|field| field.generic_argument().zip_result(field.ty()))
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .unzip();
-
-        let types = types
-            .into_iter()
-            .map(|ts| parse2(ts.to_token_stream()))
-            .collect::<Result<Vec<_>>>()?;
-
-        Ok((names, types))
-    }
-
-    fn get_fields_type(&self) -> Vec<TokenStream> {
-        self.fields
-            .values()
-            .map(|field| {
-                let ident = &field.ident;
-                let generic_argument = field.generic_argument_ident();
-
-                quote! { #ident: #generic_argument, }
-            })
-            .collect()
-    }
-
-    fn get_fields_assign(&self) -> Result<Vec<TokenStream>> {
-        self.fields
-            .values()
-            .map(|field| field.to_token_stream(Some(quote! { self. })))
-            .collect()
-    }
-
     pub fn to_token_stream(&self) -> Result<TokenStream> {
         let (new_generics_names, new_generics) = self.get_new_generics()?;
         let fields_type = self.get_fields_type();
-        let fields_assign = self.get_fields_assign()?;
+        let token_stream_impl_ident_body = self.to_token_stream_impl_ident_body()?;
 
         let vis = &self.vis;
         let ident = &self.ident;
@@ -100,7 +63,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
                 #where_clause
                 {
                     #debug_struct_ident {
-                        #(#fields_assign)*
+                        #token_stream_impl_ident_body
                     }
                 }
             }
@@ -113,7 +76,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
             #[automatically_derived]
             #vis struct #debug_struct_ident <#(#new_generics_names),*>
             {
-                #(#fields_type)*
+                #fields_type
             }
         };
 

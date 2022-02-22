@@ -1,15 +1,14 @@
 use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote};
 use syn::{
-    parse2, DeriveInput, Error, Fields, FieldsNamed, GenericArgument, ImplGenerics, Type,
-    TypeGenerics, Variant, Visibility, WhereClause,
+    DeriveInput, Error, Fields, FieldsNamed, GenericArgument, ImplGenerics, TypeGenerics, Variant,
+    Visibility, WhereClause,
 };
 
 use crate::{
     common::ErrorCallSite,
-    fields::{AsyncDebugField, AsyncDebugFieldIdent, AsyncDebugFields},
-    zip_result::ZipResult,
+    fields::{AsyncDebugFieldIdent, AsyncDebugFields, AsyncDebugFieldsMap},
     Result,
 };
 
@@ -154,10 +153,14 @@ impl<'a> AsyncDebugEnum<'a> {
 pub struct AsyncDebugVariant {
     variant: Variant,
     enum_debug_ident: Ident,
-    fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
+    fields: AsyncDebugFieldsMap,
 }
 
-impl AsyncDebugFields for AsyncDebugVariant {}
+impl AsyncDebugFields for AsyncDebugVariant {
+    fn get_fields(&self) -> &AsyncDebugFieldsMap {
+        &self.fields
+    }
+}
 
 impl AsyncDebugVariant {
     fn new(variant: Variant, enum_debug_ident: Ident) -> Result<Self> {
@@ -184,35 +187,6 @@ impl AsyncDebugVariant {
             enum_debug_ident,
             fields,
         })
-    }
-
-    fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {
-        let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
-            .fields
-            .values()
-            .map(|field| field.generic_argument().zip_result(field.ty()))
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .unzip();
-
-        let types = types
-            .into_iter()
-            .map(|ts| parse2(ts.to_token_stream()))
-            .collect::<Result<Vec<_>>>()?;
-
-        Ok((names, types))
-    }
-
-    fn get_fields_type(&self) -> TokenStream {
-        self.fields
-            .values()
-            .map(|field| {
-                let ident = &field.ident;
-                let generic_argument = field.generic_argument_ident();
-
-                quote! { #ident: #generic_argument, }
-            })
-            .collect()
     }
 
     fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
