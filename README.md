@@ -32,7 +32,7 @@ Just derive from `async_debug::AsyncDebug` and add the appropriate attribute!
 Add to cargo.toml:
 ```toml
 [dependencies]
-async-debug = "0.1.0"
+async-debug = "0.1.1"
 ```
 
 ```rust

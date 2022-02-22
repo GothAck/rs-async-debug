@@ -1,6 +1,6 @@
 [package]
 name = "async-debug-derive"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Greg \"GothAck\" Miell <rust@greg.gothack.ninja>"]
 description = "Derive macro for async-debug: Debug structs and enums containing values that require an async call to render"
 keywords = ["async", "debug", "rwlock", "mutex", "tokio"]
