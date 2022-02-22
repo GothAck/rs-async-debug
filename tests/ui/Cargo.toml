@@ -25,20 +25,24 @@ name = "fail_union"
 path = "fail/union.rs"
 
 [[bin]]
-name = "pass_basic"
-path = "pass/basic.rs"
+name = "pass_enum_named"
+path = "pass/enum_named.rs"
 
 [[bin]]
-name = "pass_enum"
-path = "pass/enum.rs"
-
-[[bin]]
-name = "pass_generics"
-path = "pass/generics.rs"
+name = "pass_enum_unnamed"
+path = "pass/enum_unnamed.rs"
 
 [[bin]]
 name = "pass_rust_generics"
 path = "pass/rust_generics.rs"
+
+[[bin]]
+name = "pass_struct_named"
+path = "pass/struct_named.rs"
+
+[[bin]]
+name = "pass_struct_named_generics"
+path = "pass/struct_named_generics.rs"
 
 [[bin]]
 name = "pass_struct_unnamed"
