@@ -1,6 +1,6 @@
 [package]
 name = "async-debug"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Greg \"GothAck\" Miell <rust@greg.gothack.ninja>"]
 description = "Debug structs and enums containing values that require an async call to render"
 keywords = ["async", "debug", "rwlock", "mutex", "tokio"]
@@ -12,7 +12,7 @@ license = "MIT"
 edition = "2021"
 
 [dependencies]
-async-debug-derive = { path = "crates/async-debug-derive", version = "0.1.1" }
+async-debug-derive = { path = "crates/async-debug-derive", version = "0.1.2" }
 
 [dev-dependencies]
 tokio = { version = "~1.17.0", features = ["full"] }
