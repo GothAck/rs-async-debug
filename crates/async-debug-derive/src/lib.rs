@@ -1,3 +1,5 @@
+//! Derive macro for [async-debug](https://crates.io/crates/async-debug)
+
 mod common;
 mod enums;
 mod fields;
