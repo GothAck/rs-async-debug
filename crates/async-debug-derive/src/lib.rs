@@ -7,6 +7,8 @@ mod common;
 mod enums;
 mod fields;
 mod structs;
+#[cfg(test)]
+mod tests;
 mod zip_result;
 
 extern crate proc_macro;
