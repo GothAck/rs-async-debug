@@ -109,7 +109,10 @@ impl AsyncDebugField {
             ts = quote! { &#ts };
         }
 
-        Ok(quote! { #ident: #ts, })
+        Ok(match ident {
+            AsyncDebugFieldIdent::Ident(ident) => quote! { #ident: #ts, },
+            AsyncDebugFieldIdent::Index(_) => quote! { #ts, },
+        })
     }
 }
 

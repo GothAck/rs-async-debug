@@ -1,15 +1,16 @@
 mod named;
+mod unnamed;
 
 use proc_macro2::TokenStream;
-use syn::{DeriveInput, Error, Fields, FieldsNamed};
+use syn::{DeriveInput, Error, Fields, FieldsNamed, FieldsUnnamed};
 
-use self::named::AsyncDebugStructNamed;
+use self::{named::AsyncDebugStructNamed, unnamed::AsyncDebugStructUnnamed};
 use super::{common::*, Result};
 
 pub enum AsyncDebugStruct<'a> {
     Named(AsyncDebugStructNamed<'a>),
     Unit,
-    Unnamed,
+    Unnamed(AsyncDebugStructUnnamed<'a>),
 }
 
 impl<'a> AsyncDebugStruct<'a> {
@@ -19,7 +20,12 @@ impl<'a> AsyncDebugStruct<'a> {
                 Self::Named(AsyncDebugStructNamed::new(input, fields.iter().collect())?)
             }
             Fields::Unit => Self::Unit,
-            Fields::Unnamed(..) => Self::Unnamed,
+            Fields::Unnamed(FieldsUnnamed {
+                unnamed: fields, ..
+            }) => Self::Unnamed(AsyncDebugStructUnnamed::new(
+                input,
+                fields.iter().collect(),
+            )?),
         })
     }
 
@@ -27,7 +33,7 @@ impl<'a> AsyncDebugStruct<'a> {
         match self {
             Self::Named(named) => named.to_token_stream(),
             Self::Unit => Err(Error::new_call_site("unit structs are not supported")),
-            Self::Unnamed => Err(Error::new_call_site("unnamed field structs are not supported")),
+            Self::Unnamed(unnamed) => unnamed.to_token_stream(),
         }
     }
 }

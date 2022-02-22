@@ -21,10 +21,6 @@ name = "fail_struct_unit"
 path = "fail/struct_unit.rs"
 
 [[bin]]
-name = "fail_struct_unnamed"
-path = "fail/struct_unnamed.rs"
-
-[[bin]]
 name = "fail_union"
 path = "fail/union.rs"
 
@@ -44,3 +40,6 @@ path = "pass/generics.rs"
 name = "pass_rust_generics"
 path = "pass/rust_generics.rs"
 
+[[bin]]
+name = "pass_struct_unnamed"
+path = "pass/struct_unnamed.rs"
