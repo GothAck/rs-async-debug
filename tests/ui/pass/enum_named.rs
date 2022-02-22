@@ -21,7 +21,7 @@ enum Mixed {
         v2_mutex: Mutex<Vec<u64>>,
         #[async_debug(parse = Mutex::lock, copy, ty = u128)]
         v2_mutex_u128: Mutex<u128>,
-    }
+    },
 }
 
 #[tokio::main]

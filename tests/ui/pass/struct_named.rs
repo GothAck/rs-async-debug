@@ -15,7 +15,6 @@ struct Mixed {
 
 #[tokio::main]
 async fn main() {
-
     let mixed = Mixed {
         string: "test".into(),
         integer: 42,

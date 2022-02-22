@@ -8,9 +8,7 @@ union Mixed {
 
 #[tokio::main]
 async fn main() {
-    let mixed = Mixed {
-        float: 3.141,
-    };
+    let mixed = Mixed { float: 3.141 };
 
     assert_eq!(
         format!("{:?}", mixed.async_debug().await),

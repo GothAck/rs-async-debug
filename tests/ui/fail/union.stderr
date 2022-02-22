@@ -13,10 +13,10 @@ error: unions are not supported
   = note: this error originates in the derive macro `AsyncDebug` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0599]: no method named `async_debug` found for union `Mixed` in the current scope
-  --> tests/ui/fail/union.rs:16:31
+  --> tests/ui/fail/union.rs:14:31
    |
 4  | union Mixed {
    | ----------- method `async_debug` not found for this
 ...
-16 |         format!("{:?}", mixed.async_debug().await),
+14 |         format!("{:?}", mixed.async_debug().await),
    |                               ^^^^^^^^^^^ method not found in `Mixed`

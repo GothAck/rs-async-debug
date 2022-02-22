@@ -1,6 +1,14 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+  - repo: local
+    hooks:
+    - id: readme-sync
+      name: sync readme file
+      language: system
+      entry: cargo sync-readme
+      files: ^src/lib.rs$
+      pass_filenames: false
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:
