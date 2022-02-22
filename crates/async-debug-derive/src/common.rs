@@ -12,7 +12,9 @@ pub trait AsyncDebugCommon {
 
 pub mod attr_prop {
     use bae::FromAttributes;
-    use syn::{Expr, Type};
+    use syn::{spanned::Spanned, Expr, Type};
+
+    use crate::common::prelude::*;
 
     #[derive(FromAttributes, Default)]
     pub struct AsyncDebug {
@@ -22,6 +24,25 @@ pub mod attr_prop {
         pub ty: Option<Type>,
 
         pub skip: Option<()>,
+    }
+
+    impl AsyncDebug {
+        pub fn validate(&self, spanned: &impl Spanned) -> Result<()> {
+            if self.skip.is_some()
+                && (self.async_call.is_some() || self.clone.is_some() || self.copy.is_some())
+            {
+                return Err(Error::new(spanned.span(), "skip can only be used alone"));
+            }
+
+            if self.clone.is_some() && self.copy.is_some() {
+                return Err(Error::new(
+                    spanned.span(),
+                    "clone and copy are mutually exclusive",
+                ));
+            }
+
+            Ok(())
+        }
     }
 }
 

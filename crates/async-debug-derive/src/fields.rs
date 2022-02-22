@@ -111,6 +111,8 @@ impl AsyncDebugField {
             .map(|async_debug| (true, async_debug))
             .unwrap_or_default();
 
+        async_debug.validate(&field.ident)?;
+
         Ok(Self {
             field,
             variant_ident,
@@ -163,10 +165,6 @@ impl AsyncDebugField {
 
         if let Some(async_call) = &self.async_debug.async_call {
             ts = quote! { #async_call(&#ts).await };
-        }
-
-        if self.async_debug.copy.is_some() && self.async_debug.clone.is_some() {
-            return Err(Error::new_spanned(ident, "copy and clone are exclusive"));
         }
 
         if self.async_debug.copy.is_some() {

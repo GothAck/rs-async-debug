@@ -1,4 +1,4 @@
-error: copy and clone are exclusive
+error: clone and copy are mutually exclusive
  --> tests/ui/fail/exclusive_clone_copy.rs:9:5
   |
 9 |     rw_lock: RwLock<Vec<String>>,
