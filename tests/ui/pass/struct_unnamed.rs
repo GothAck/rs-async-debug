@@ -22,6 +22,6 @@ async fn main() {
 
     assert_eq!(
         format!("{:?}", mixed.async_debug().await),
-        "MixedAsyncDebug(\"test\", 42, [\"string0\", \"string1\"], [0, 1], 999)",
+        "Mixed(\"test\", 42, [\"string0\", \"string1\"], [0, 1], 999)",
     );
 }

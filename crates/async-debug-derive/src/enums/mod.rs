@@ -20,7 +20,6 @@ use self::{named::AsyncDebugVariantNamed, unnamed::AsyncDebugVariantUnnamed};
 pub struct AsyncDebugEnum<'a> {
     vis: Visibility,
     ident: Ident,
-    debug_ident: Ident,
     mod_ident: Ident,
     generics_impl: ImplGenerics<'a>,
     generics_ty: TypeGenerics<'a>,
@@ -32,7 +31,6 @@ impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}
 
 impl<'a> AsyncDebugEnum<'a> {
     pub fn new(input: &'a DeriveInput, variants: Vec<Variant>) -> Result<Self> {
-        let debug_ident = Self::get_async_debug_ident(&input.ident);
         let mod_ident = Self::get_async_debug_mod_ident(&input.ident);
 
         let variants = variants
@@ -42,7 +40,7 @@ impl<'a> AsyncDebugEnum<'a> {
 
                 Ok((
                     ident.clone(),
-                    AsyncDebugVariant::new(variant.clone(), debug_ident.clone())?,
+                    AsyncDebugVariant::new(variant.clone(), input.ident.clone())?,
                 ))
             })
             .collect::<Result<IndexMap<_, _>>>()?;
@@ -52,7 +50,6 @@ impl<'a> AsyncDebugEnum<'a> {
         Ok(Self {
             vis: input.vis.clone(),
             ident: input.ident.clone(),
-            debug_ident,
             mod_ident,
             generics_impl,
             generics_ty,
@@ -99,7 +96,6 @@ impl<'a> AsyncDebugEnum<'a> {
 
         let vis = &self.vis;
         let ident = &self.ident;
-        let debug_ident = &self.debug_ident;
         let mod_ident = &self.mod_ident;
 
         let generics_impl = &self.generics_impl;
@@ -115,7 +111,7 @@ impl<'a> AsyncDebugEnum<'a> {
         let ts_impl_ident = quote! {
             #[automatically_derived]
             impl #generics_impl #ident #generics_ty #where_clause {
-                #vis async fn async_debug (&self) -> #mod_ident::#debug_ident <#(#new_generics),*>
+                #vis async fn async_debug (&self) -> #mod_ident::#ident <#(#new_generics),*>
                 #where_clause
                 {
                     match self {
@@ -131,7 +127,7 @@ impl<'a> AsyncDebugEnum<'a> {
                 #[allow(dead_code)]
                 #[allow(non_camel_case_types)]
                 #[automatically_derived]
-                pub enum #debug_ident <#(#new_generics_names),*>
+                pub enum #ident <#(#new_generics_names),*>
                 {
                     #variants
                 }

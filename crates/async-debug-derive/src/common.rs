@@ -1,7 +1,6 @@
 use bae::FromAttributes;
 use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Span};
-use quote::format_ident;
 use syn::{Error, Expr, Type};
 
 pub trait ErrorCallSite {
@@ -25,9 +24,6 @@ pub trait AsyncDebugCommon {
             &format!("async_debug_{}", ident.to_string().to_case(Case::Snake)),
             ident.span(),
         )
-    }
-    fn get_async_debug_ident(ident: &Ident) -> Ident {
-        format_ident!("{}AsyncDebug", ident)
     }
 }
 

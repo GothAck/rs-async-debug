@@ -48,7 +48,7 @@ struct MyStruct {
 let my_struct = MyStruct { my_value: RwLock::from("Hello, world!".to_string()) };
 assert_eq!(
     format!("{:?}", my_struct.async_debug().await),
-    "MyStructAsyncDebug { my_value: \"Hello, world!\" }",
+    "MyStruct { my_value: \"Hello, world!\" }",
 );
 ```
 

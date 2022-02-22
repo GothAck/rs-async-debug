@@ -78,7 +78,7 @@ async fn main() {
 
     assert_eq!(
         format!("{:?}", struct_unnamed.async_debug().await),
-        "StructUnnamedAsyncDebug(\"test\", 42, [\"string0\", \"string1\"], [0, 1], 999)",
+        "StructUnnamed(\"test\", 42, [\"string0\", \"string1\"], [0, 1], 999)",
     );
 
     let struct_named = module::StructNamed {
@@ -91,7 +91,7 @@ async fn main() {
 
     assert_eq!(
         format!("{:?}", struct_named.async_debug().await),
-        "StructNamedAsyncDebug { string: \"test\", integer: 42, rw_lock: [\"string0\", \"string1\"], mutex: [0, 1], mutex_u128: 999 }",
+        "StructNamed { string: \"test\", integer: 42, rw_lock: [\"string0\", \"string1\"], mutex: [0, 1], mutex_u128: 999 }",
     );
 
     let enum_named_v1 = module::EnumNamed::Variant1 {
