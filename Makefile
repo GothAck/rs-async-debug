@@ -2,9 +2,9 @@ build:
 	cargo build
 
 test:
-	cargo test
+	cargo test -p
 
 publish: build test
-	$(MAKE) -C crates/async-debug-derive publish
+	publish -p async-debug-derive
 	sleep 15
-	cargo publish
+	cargo publish -p async-debug
