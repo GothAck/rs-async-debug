@@ -51,9 +51,19 @@ pub trait AsyncDebugFields {
                 let ident = &field.ident;
                 let generic_argument = field.generic_argument_ident();
 
+                let vis = {
+                    if field.variant_ident.is_none() {
+                        Some(quote! { pub(super) })
+                    } else {
+                        None
+                    }
+                };
+
                 match ident {
-                    AsyncDebugFieldIdent::Ident(ident) => quote! { #ident: #generic_argument, },
-                    AsyncDebugFieldIdent::Index(_) => quote! { #generic_argument, },
+                    AsyncDebugFieldIdent::Ident(ident) => {
+                        quote! { #vis #ident: #generic_argument, }
+                    }
+                    AsyncDebugFieldIdent::Index(_) => quote! { #vis #generic_argument, },
                 }
             })
             .collect()

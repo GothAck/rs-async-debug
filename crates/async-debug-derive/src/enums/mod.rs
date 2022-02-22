@@ -21,6 +21,7 @@ pub struct AsyncDebugEnum<'a> {
     vis: Visibility,
     ident: Ident,
     debug_ident: Ident,
+    mod_ident: Ident,
     generics_impl: ImplGenerics<'a>,
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
@@ -32,6 +33,7 @@ impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}
 impl<'a> AsyncDebugEnum<'a> {
     pub fn new(input: &'a DeriveInput, variants: Vec<Variant>) -> Result<Self> {
         let debug_ident = Self::get_async_debug_ident(&input.ident);
+        let mod_ident = Self::get_async_debug_mod_ident(&input.ident);
 
         let variants = variants
             .iter()
@@ -51,6 +53,7 @@ impl<'a> AsyncDebugEnum<'a> {
             vis: input.vis.clone(),
             ident: input.ident.clone(),
             debug_ident,
+            mod_ident,
             generics_impl,
             generics_ty,
             where_clause,
@@ -86,7 +89,7 @@ impl<'a> AsyncDebugEnum<'a> {
     pub fn to_token_stream_impl_ident_bodies(&self) -> Result<TokenStream> {
         self.variants
             .values()
-            .map(|variant| variant.to_token_stream_impl_ident_body())
+            .map(|variant| variant.to_token_stream_impl_ident_body(&self.mod_ident))
             .collect()
     }
 
@@ -97,6 +100,7 @@ impl<'a> AsyncDebugEnum<'a> {
         let vis = &self.vis;
         let ident = &self.ident;
         let debug_ident = &self.debug_ident;
+        let mod_ident = &self.mod_ident;
 
         let generics_impl = &self.generics_impl;
         let generics_ty = &self.generics_ty;
@@ -111,7 +115,7 @@ impl<'a> AsyncDebugEnum<'a> {
         let ts_impl_ident = quote! {
             #[automatically_derived]
             impl #generics_impl #ident #generics_ty #where_clause {
-                #vis async fn async_debug (&self) -> #debug_ident <#(#new_generics),*>
+                #vis async fn async_debug (&self) -> #mod_ident::#debug_ident <#(#new_generics),*>
                 #where_clause
                 {
                     match self {
@@ -122,13 +126,15 @@ impl<'a> AsyncDebugEnum<'a> {
         };
 
         let ts_enum = quote! {
-            #[derive(Debug)]
-            #[allow(dead_code)]
-            #[allow(non_camel_case_types)]
-            #[automatically_derived]
-            #vis enum #debug_ident <#(#new_generics_names),*>
-            {
-                #variants
+            #vis mod #mod_ident {
+                #[derive(Debug)]
+                #[allow(dead_code)]
+                #[allow(non_camel_case_types)]
+                #[automatically_derived]
+                pub enum #debug_ident <#(#new_generics_names),*>
+                {
+                    #variants
+                }
             }
         };
 
@@ -181,11 +187,11 @@ impl AsyncDebugVariant {
         }
     }
 
-    fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
+    fn to_token_stream_impl_ident_body(&self, mod_ident: &Ident) -> Result<TokenStream> {
         match self {
-            Self::Named(named) => named.to_token_stream_impl_ident_body(),
+            Self::Named(named) => named.to_token_stream_impl_ident_body(mod_ident),
             Self::Unit => Err(Error::new_call_site("unreachable")),
-            Self::Unnamed(unnamed) => unnamed.to_token_stream_impl_ident_body(),
+            Self::Unnamed(unnamed) => unnamed.to_token_stream_impl_ident_body(mod_ident),
         }
     }
 

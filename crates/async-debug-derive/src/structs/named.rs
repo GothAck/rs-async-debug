@@ -55,6 +55,7 @@ impl<'a> AsyncDebugStructNamed<'a> {
         let where_clause = &self.where_clause;
 
         let async_debug_ident = Self::get_async_debug_ident(ident);
+        let async_debug_mod_ident = Self::get_async_debug_mod_ident(ident);
 
         let ts_impl_async_debug = quote! {
             impl #generics_impl AsyncDebug for #ident #generics_ty #where_clause {}
@@ -63,10 +64,10 @@ impl<'a> AsyncDebugStructNamed<'a> {
         let ts_impl_ident = quote! {
             #[automatically_derived]
             impl #generics_impl #ident #generics_ty #where_clause {
-                #vis async fn async_debug (&self) -> #async_debug_ident <#(#new_generics),*>
+                #vis async fn async_debug (&self) -> #async_debug_mod_ident::#async_debug_ident <#(#new_generics),*>
                 #where_clause
                 {
-                    #async_debug_ident {
+                    #async_debug_mod_ident::#async_debug_ident {
                         #token_stream_impl_ident_body
                     }
                 }
@@ -74,13 +75,17 @@ impl<'a> AsyncDebugStructNamed<'a> {
         };
 
         let ts_struct = quote! {
-            #[derive(Debug)]
-            #[allow(dead_code)]
-            #[allow(non_camel_case_types)]
-            #[automatically_derived]
-            #vis struct #async_debug_ident <#(#new_generics_names),*>
-            {
-                #fields_type
+            #vis mod #async_debug_mod_ident {
+                use super::*;
+
+                #[derive(Debug)]
+                #[allow(dead_code)]
+                #[allow(non_camel_case_types)]
+                #[automatically_derived]
+                pub struct #async_debug_ident <#(#new_generics_names),*>
+                {
+                    #fields_type
+                }
             }
         };
 

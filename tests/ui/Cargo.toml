@@ -51,3 +51,7 @@ path = "pass/struct_named_generics.rs"
 [[bin]]
 name = "pass_struct_unnamed"
 path = "pass/struct_unnamed.rs"
+
+[[bin]]
+name = "pass_vis_super"
+path = "pass/vis_super.rs"

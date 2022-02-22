@@ -17,6 +17,7 @@ name = "async-debug-derive"
 version = "0.1.2"
 dependencies = [
  "bae",
+ "convert_case",
  "goldenfile",
  "indexmap",
  "prettyplease",
@@ -61,6 +62,12 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "convert_case"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
 name = "difference"

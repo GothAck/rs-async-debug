@@ -28,7 +28,7 @@ impl AsyncDebugVariantUnnamed {
         })
     }
 
-    pub fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
+    pub fn to_token_stream_impl_ident_body(&self, mod_ident: &Ident) -> Result<TokenStream> {
         let ident = &self.variant.ident;
         let enum_debug_ident = &self.enum_debug_ident;
         let field_idents = self
@@ -44,7 +44,7 @@ impl AsyncDebugVariantUnnamed {
             <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
 
         Ok(quote! {
-            Self::#ident ( #(#field_idents),* ) => #enum_debug_ident::#ident (
+            Self::#ident ( #(#field_idents),* ) => #mod_ident::#enum_debug_ident::#ident (
                 #token_stream_impl_ident_body
             ),
         })
