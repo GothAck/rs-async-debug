@@ -14,7 +14,7 @@ pub mod attr_prop {
     use bae::FromAttributes;
     use syn::{Expr, Type};
 
-    #[derive(FromAttributes)]
+    #[derive(FromAttributes, Default)]
     pub struct AsyncDebug {
         pub async_call: Option<Expr>,
         pub clone: Option<()>,

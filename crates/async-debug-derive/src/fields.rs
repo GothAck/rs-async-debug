@@ -34,7 +34,7 @@ pub trait AsyncDebugFields {
         let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
             .get_fields()
             .values()
-            .filter(|field| !field.skip)
+            .filter(|field| field.async_debug.skip.is_none())
             .map(|field| field.generic_argument().zip_result(field.ty()))
             .collect::<Result<Vec<_>>>()?
             .into_iter()
@@ -51,7 +51,7 @@ pub trait AsyncDebugFields {
     fn get_fields_type(&self) -> TokenStream {
         self.get_fields()
             .values()
-            .filter(|field| !field.skip)
+            .filter(|field| field.async_debug.skip.is_none())
             .map(|field| {
                 let ident = &field.ident;
                 let generic_argument = field.generic_argument_ident();
@@ -77,7 +77,7 @@ pub trait AsyncDebugFields {
     fn to_token_stream_impl_ident_body(&self, prefix: Option<TokenStream>) -> Result<TokenStream> {
         self.get_fields()
             .values()
-            .filter(|field| !field.skip)
+            .filter(|field| field.async_debug.skip.is_none())
             .map(|field| field.to_token_stream(prefix.clone()))
             .collect()
     }
@@ -87,8 +87,8 @@ pub struct AsyncDebugField {
     pub field: Field,
     pub variant_ident: Option<Ident>,
     pub ident: AsyncDebugFieldIdent,
-    pub async_debug: Option<AsyncDebug>,
-    pub skip: bool,
+    pub async_debug_present: bool,
+    pub async_debug: AsyncDebug,
 }
 
 impl AsyncDebugField {
@@ -107,40 +107,29 @@ impl AsyncDebugField {
                 }))
             })?;
 
-        let async_debug = AsyncDebug::try_from_attributes(&field.attrs)?;
-
-        let skip = {
-            if let Some(async_debug) = async_debug {
-                async_debug.skip.is_some()
-            } else {
-                false
-            }
-        };
+        let (async_debug_present, async_debug) = AsyncDebug::try_from_attributes(&field.attrs)?
+            .map(|async_debug| (true, async_debug))
+            .unwrap_or_default();
 
         Ok(Self {
-            async_debug: AsyncDebug::try_from_attributes(&field.attrs)?,
             field,
             variant_ident,
             ident,
-            skip,
+            async_debug_present,
+            async_debug,
         })
     }
 
     pub fn ty(&self) -> Result<Type> {
-        if let Some(async_debug) = &self.async_debug {
-            if let Some(ty) = &async_debug.ty {
-                return Ok(ty.clone());
-            }
+        if let Some(ty) = &self.async_debug.ty {
+            return Ok(ty.clone());
         }
         let ty = &self.field.ty;
         parse2(quote! { &#ty })
     }
 
     pub fn custom_type(&self) -> bool {
-        if let Some(async_debug) = &self.async_debug {
-            return async_debug.ty.is_some();
-        }
-        false
+        self.async_debug.ty.is_some()
     }
 
     pub fn generic_argument_ident(&self) -> Ident {
@@ -172,20 +161,18 @@ impl AsyncDebugField {
 
         let mut ts = quote! { #prefix #ts_ident };
 
-        if let Some(async_debug) = &self.async_debug {
-            if let Some(async_call) = &async_debug.async_call {
-                ts = quote! { #async_call(&#ts).await };
-            }
+        if let Some(async_call) = &self.async_debug.async_call {
+            ts = quote! { #async_call(&#ts).await };
+        }
 
-            if async_debug.copy.is_some() && async_debug.clone.is_some() {
-                return Err(Error::new_spanned(ident, "copy and clone are exclusive"));
-            }
+        if self.async_debug.copy.is_some() && self.async_debug.clone.is_some() {
+            return Err(Error::new_spanned(ident, "copy and clone are exclusive"));
+        }
 
-            if async_debug.copy.is_some() {
-                ts = quote! { *#ts };
-            } else if async_debug.clone.is_some() {
-                ts = quote! { #ts.clone() }
-            }
+        if self.async_debug.copy.is_some() {
+            ts = quote! { *#ts };
+        } else if self.async_debug.clone.is_some() {
+            ts = quote! { #ts.clone() }
         }
 
         if !self.custom_type() {
