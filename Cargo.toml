@@ -17,6 +17,7 @@ async-debug-derive = { path = "crates/async-debug-derive", version = "0.1.0" }
 [dev-dependencies]
 tokio = { version = "~1.17.0", features = ["full"] }
 trybuild = "~1.0.56"
+version-sync = "~0.9.4"
 
 [workspace]
 members = [
