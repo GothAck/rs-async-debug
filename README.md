@@ -1,3 +1,7 @@
+![Crates.io](https://img.shields.io/crates/v/async-debug)
+![Crates.io](https://img.shields.io/crates/l/async-debug)
+![docs.rs](https://img.shields.io/docsrs/async-debug)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 <!-- cargo-sync-readme start -->
 
 The `async-debug` crate makes it easy to debug structs and enums containing
