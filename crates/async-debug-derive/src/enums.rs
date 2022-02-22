@@ -69,7 +69,7 @@ impl<'a> AsyncDebugEnum<'a> {
         Ok((names, types))
     }
 
-    fn get_variants(&self) -> Result<Vec<TokenStream>> {
+    fn get_variants(&self) -> Result<TokenStream> {
         self.variants
             .values()
             .map(|variant| variant.to_token_stream())
@@ -138,7 +138,7 @@ impl<'a> AsyncDebugEnum<'a> {
             #[automatically_derived]
             #vis enum #debug_ident <#(#new_generics_names),*>
             {
-                #(#variants)*
+                #variants
             }
         };
 
@@ -192,7 +192,7 @@ impl AsyncDebugVariant {
     fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
         let ident = &self.variant.ident;
         let enum_debug_ident = &self.enum_debug_ident;
-        let (field_idents, field_ts): (Vec<&AsyncDebugFieldIdent>, Vec<TokenStream>) = self
+        let (field_idents, field_ts): (Vec<&AsyncDebugFieldIdent>, TokenStream) = self
             .fields
             .iter()
             .map(|(ident, field)| field.to_token_stream(None).map(|ts| (ident, ts)))
@@ -202,7 +202,7 @@ impl AsyncDebugVariant {
 
         Ok(quote! {
             Self::#ident { #(#field_idents),* } => #enum_debug_ident::#ident {
-                #(#field_ts)*
+                #field_ts
             },
         })
     }
