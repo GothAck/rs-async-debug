@@ -1,11 +1,9 @@
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, format_ident};
-use syn::{
-    Variant, Field,
-};
+use quote::{format_ident, quote};
+use syn::{Field, Variant};
 
 use crate::{
-    fields::{AsyncDebugFields, AsyncDebugFieldsMap, AsyncDebugFieldIdent},
+    fields::{AsyncDebugFieldIdent, AsyncDebugFields, AsyncDebugFieldsMap},
     Result,
 };
 
@@ -26,7 +24,7 @@ impl AsyncDebugVariantUnnamed {
         Ok(Self {
             fields: Self::convert_fields(fields.iter().collect(), Some(variant.ident.clone()))?,
             variant,
-            enum_debug_ident: enum_debug_ident.clone(),
+            enum_debug_ident,
         })
     }
 
@@ -36,15 +34,14 @@ impl AsyncDebugVariantUnnamed {
         let field_idents = self
             .fields
             .keys()
-            .map(|ident| {
-                match ident {
-                    AsyncDebugFieldIdent::Ident(ident) => ident.clone(),
-                    AsyncDebugFieldIdent::Index(index) => format_ident!("self_{}", index.index),
-                }
+            .map(|ident| match ident {
+                AsyncDebugFieldIdent::Ident(ident) => ident.clone(),
+                AsyncDebugFieldIdent::Index(index) => format_ident!("self_{}", index.index),
             })
             .collect::<Vec<_>>();
 
-        let token_stream_impl_ident_body = <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
+        let token_stream_impl_ident_body =
+            <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
 
         Ok(quote! {
             Self::#ident ( #(#field_idents),* ) => #enum_debug_ident::#ident (

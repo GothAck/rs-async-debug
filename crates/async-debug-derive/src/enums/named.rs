@@ -1,8 +1,6 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{
-    Variant, Field,
-};
+use syn::{Field, Variant};
 
 use crate::{
     fields::{AsyncDebugFields, AsyncDebugFieldsMap},
@@ -33,12 +31,10 @@ impl AsyncDebugVariantNamed {
     pub fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
         let ident = &self.variant.ident;
         let enum_debug_ident = &self.enum_debug_ident;
-        let field_idents = self
-            .fields
-            .keys()
-            .collect::<Vec<_>>();
+        let field_idents = self.fields.keys().collect::<Vec<_>>();
 
-        let token_stream_impl_ident_body = <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
+        let token_stream_impl_ident_body =
+            <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
 
         Ok(quote! {
             Self::#ident { #(#field_idents),* } => #enum_debug_ident::#ident {

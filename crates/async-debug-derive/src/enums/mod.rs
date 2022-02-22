@@ -3,15 +3,16 @@ mod unnamed;
 
 use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{
-    DeriveInput, Error, GenericArgument, ImplGenerics, TypeGenerics, Variant,
-    Visibility, WhereClause, Fields, FieldsNamed, FieldsUnnamed,
+    DeriveInput, Error, Fields, FieldsNamed, FieldsUnnamed, GenericArgument, ImplGenerics,
+    TypeGenerics, Variant, Visibility, WhereClause,
 };
 
 use crate::{
+    common::{AsyncDebugCommon, ErrorCallSite},
     fields::AsyncDebugFields,
-    Result, common::ErrorCallSite,
+    Result,
 };
 
 use self::{named::AsyncDebugVariantNamed, unnamed::AsyncDebugVariantUnnamed};
@@ -26,9 +27,11 @@ pub struct AsyncDebugEnum<'a> {
     variants: IndexMap<Ident, AsyncDebugVariant>,
 }
 
+impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}
+
 impl<'a> AsyncDebugEnum<'a> {
     pub fn new(input: &'a DeriveInput, variants: Vec<Variant>) -> Result<Self> {
-        let debug_ident = format_ident!("{}Debug", input.ident);
+        let debug_ident = Self::get_async_debug_ident(&input.ident);
 
         let variants = variants
             .iter()
@@ -149,7 +152,11 @@ impl AsyncDebugVariant {
             Fields::Named(FieldsNamed { named: fields, .. }) => {
                 let fields = fields.iter().cloned().collect::<Vec<_>>();
 
-                Self::Named(AsyncDebugVariantNamed::new(variant, enum_debug_ident, fields)?)
+                Self::Named(AsyncDebugVariantNamed::new(
+                    variant,
+                    enum_debug_ident,
+                    fields,
+                )?)
             }
             Fields::Unit => Self::Unit,
             Fields::Unnamed(FieldsUnnamed {
@@ -162,7 +169,7 @@ impl AsyncDebugVariant {
                     enum_debug_ident,
                     fields,
                 )?)
-            },
+            }
         })
     }
 

@@ -138,7 +138,7 @@ impl AsyncDebugField {
                     } else {
                         ident.clone()
                     }
-                },
+                }
             }
         };
 
