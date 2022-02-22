@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 async-debug-derive = { path = "crates/async-debug-derive" }
-async-trait = "0.1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
