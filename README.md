@@ -1,6 +1,6 @@
-![Crates.io](https://img.shields.io/crates/v/async-debug)
-![Crates.io](https://img.shields.io/crates/l/async-debug)
-![docs.rs](https://img.shields.io/docsrs/async-debug)
+[![Crates.io](https://img.shields.io/crates/v/async-debug)](https://crates.io/crates/async-debug)
+[![Crates.io](https://img.shields.io/crates/l/async-debug)](https://crates.io/crates/async-debug)
+[![docs.rs](https://img.shields.io/docsrs/async-debug)](https://docs.rs/async-debug)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 <!-- cargo-sync-readme start -->
 
