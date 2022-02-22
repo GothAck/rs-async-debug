@@ -1,3 +1,6 @@
+#![warn(rustdoc::missing_crate_level_docs)]
+#![warn(missing_docs)]
+
 //! # Async Debug
 //! The `async-debug` crate makes it easy to debug structs and enums containing
 //! values that require an async call to render.
@@ -37,7 +40,7 @@
 //!
 //! #[derive(AsyncDebug)]
 //! struct MyStruct {
-//!     #[async_debug(parse = RwLock::read, clone, ty = String)]
+//!     #[async_debug(async_call = RwLock::read, clone, ty = String)]
 //!     my_value: RwLock<String>
 //! }
 //!
@@ -52,4 +55,6 @@
 //! ```
 pub use async_debug_derive::AsyncDebug;
 
+/// `AsyncDebug` trait, this just marks the struct or enum as having AsyncDebug capabilities,
+/// the actual implementation is in an inherent impl
 pub trait AsyncDebug {}

@@ -41,7 +41,7 @@ use tokio::sync::RwLock;
 
 #[derive(AsyncDebug)]
 struct MyStruct {
-    #[async_debug(parse = RwLock::read, clone, ty = String)]
+    #[async_debug(async_call = RwLock::read, clone, ty = String)]
     my_value: RwLock<String>
 }
 

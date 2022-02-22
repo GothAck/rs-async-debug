@@ -26,7 +26,7 @@ pub trait AsyncDebugCommon {
 
 #[derive(FromAttributes)]
 pub struct AsyncDebug {
-    pub parse: Option<Expr>,
+    pub async_call: Option<Expr>,
     pub clone: Option<()>,
     pub copy: Option<()>,
     pub ty: Option<Type>,

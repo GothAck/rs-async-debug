@@ -145,8 +145,8 @@ impl AsyncDebugField {
         let mut ts = quote! { #prefix #ts_ident };
 
         if let Some(async_debug) = &self.async_debug {
-            if let Some(parse) = &async_debug.parse {
-                ts = quote! { #parse(&#ts).await };
+            if let Some(async_call) = &async_debug.async_call {
+                ts = quote! { #async_call(&#ts).await };
             }
 
             if async_debug.copy.is_some() && async_debug.clone.is_some() {

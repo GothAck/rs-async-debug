@@ -6,15 +6,15 @@ enum Mixed {
     Variant1(
         String,
         u64,
-        #[async_debug(parse = RwLock::read, clone, ty = Vec<String>)] RwLock<Vec<String>>,
-        #[async_debug(parse = Mutex::lock, clone, ty = Vec<u64>)] Mutex<Vec<u64>>,
-        #[async_debug(parse = Mutex::lock, copy, ty = u128)] Mutex<u128>,
+        #[async_debug(async_call = RwLock::read, clone, ty = Vec<String>)] RwLock<Vec<String>>,
+        #[async_debug(async_call = Mutex::lock, clone, ty = Vec<u64>)] Mutex<Vec<u64>>,
+        #[async_debug(async_call = Mutex::lock, copy, ty = u128)] Mutex<u128>,
     ),
     Variant2(
         String,
-        #[async_debug(parse = RwLock::read, clone, ty = Vec<String>)] RwLock<Vec<String>>,
-        #[async_debug(parse = Mutex::lock, clone, ty = Vec<u64>)] Mutex<Vec<u64>>,
-        #[async_debug(parse = Mutex::lock, copy, ty = u128)] Mutex<u128>,
+        #[async_debug(async_call = RwLock::read, clone, ty = Vec<String>)] RwLock<Vec<String>>,
+        #[async_debug(async_call = Mutex::lock, clone, ty = Vec<u64>)] Mutex<Vec<u64>>,
+        #[async_debug(async_call = Mutex::lock, copy, ty = u128)] Mutex<u128>,
     ),
 }
 
