@@ -27,7 +27,7 @@ impl<'a> AsyncDebugStruct<'a> {
         match self {
             Self::Named(named) => named.to_token_stream(),
             Self::Unit => Err(Error::new_call_site("unit structs are not supported")),
-            Self::Unnamed => Err(Error::new_call_site("unnamed structs are not supported")),
+            Self::Unnamed => Err(Error::new_call_site("unnamed field structs are not supported")),
         }
     }
 }

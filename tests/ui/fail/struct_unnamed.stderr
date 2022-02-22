@@ -12,7 +12,7 @@ error[E0599]: no method named `async_debug` found for struct `Mixed` in the curr
 5  | / struct Mixed(
 6  | |     String,
 7  | |     u64,
-8  | |     #[async_debug(parse = RwLock::read, clone, copy, ty = Vec<String>)]
+8  | |     #[async_debug(parse = RwLock::read, clone, ty = Vec<String>)]
 ...  |
 13 | |     Mutex<u128>,
 14 | | );

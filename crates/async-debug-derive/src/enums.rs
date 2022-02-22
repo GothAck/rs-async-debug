@@ -6,7 +6,12 @@ use syn::{
     TypeGenerics, Variant, Visibility, WhereClause,
 };
 
-use crate::{common::ErrorCallSite, fields::{AsyncDebugField, AsyncDebugFieldIdent}, zip_result::ZipResult, Result};
+use crate::{
+    common::ErrorCallSite,
+    fields::{AsyncDebugField, AsyncDebugFieldIdent, AsyncDebugFields},
+    zip_result::ZipResult,
+    Result,
+};
 
 pub struct AsyncDebugEnum<'a> {
     vis: Visibility,
@@ -152,19 +157,15 @@ pub struct AsyncDebugVariant {
     fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
 }
 
+impl AsyncDebugFields for AsyncDebugVariant {}
+
 impl AsyncDebugVariant {
     fn new(variant: Variant, enum_debug_ident: Ident) -> Result<Self> {
         let fields = {
             match &variant.fields {
-                Fields::Named(FieldsNamed { named: fields, .. }) => fields
-                    .iter()
-                    .cloned()
-                    .enumerate()
-                    .map(|(index, field)| {
-                        let field = AsyncDebugField::new(field, None, index)?;
-                        Ok((field.ident.clone(), field))
-                    })
-                    .collect::<Result<IndexMap<_, _>>>()?,
+                Fields::Named(FieldsNamed { named: fields, .. }) => {
+                    Self::convert_fields(fields.iter().collect(), None)?
+                }
                 Fields::Unit => {
                     return Err(Error::new_call_site(
                         "unnamed field enum variants are not supported",

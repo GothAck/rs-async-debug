@@ -2,11 +2,15 @@ use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
-    parse2, DeriveInput, Field, GenericArgument, ImplGenerics, Type, TypeGenerics,
-    Visibility, WhereClause,
+    parse2, DeriveInput, Field, GenericArgument, ImplGenerics, Type, TypeGenerics, Visibility,
+    WhereClause,
 };
 
-use crate::{fields::{AsyncDebugField, AsyncDebugFieldIdent}, zip_result::ZipResult, Result};
+use crate::{
+    fields::{AsyncDebugField, AsyncDebugFieldIdent, AsyncDebugFields},
+    zip_result::ZipResult,
+    Result,
+};
 
 pub struct AsyncDebugStructNamed<'a> {
     vis: Visibility,
@@ -17,19 +21,13 @@ pub struct AsyncDebugStructNamed<'a> {
     fields: IndexMap<AsyncDebugFieldIdent, AsyncDebugField>,
 }
 
+impl<'a> AsyncDebugFields for AsyncDebugStructNamed<'a> {}
+
 impl<'a> AsyncDebugStructNamed<'a> {
     pub fn new(input: &'a DeriveInput, fields: Vec<&Field>) -> Result<Self> {
         let (generics_impl, generics_ty, where_clause) = input.generics.split_for_impl();
 
-        let fields = fields
-            .into_iter()
-            .cloned()
-            .enumerate()
-            .map(|(index, field)| {
-                let field = AsyncDebugField::new(field, None, index)?;
-                Ok((field.ident.clone(), field))
-            })
-            .collect::<Result<IndexMap<_, _>>>()?;
+        let fields = Self::convert_fields(fields, None)?;
 
         Ok(Self {
             vis: input.vis.clone(),

@@ -2,13 +2,16 @@ use std::num::TryFromIntError;
 
 use indexmap::IndexMap;
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, format_ident, ToTokens, IdentFragment};
-use syn::{Field, Error, Type, parse2, GenericArgument, Index, spanned::Spanned};
+use quote::{format_ident, quote, IdentFragment, ToTokens};
+use syn::{parse2, spanned::Spanned, Error, Field, GenericArgument, Index, Type};
 
 use crate::{common::AsyncDebug, Result};
 
 pub trait AsyncDebugFields {
-    fn get_fields(fields: Vec<&Field>, variant_ident: Option<Ident>) -> Result<IndexMap<AsyncDebugFieldIdent, AsyncDebugField>> {
+    fn convert_fields(
+        fields: Vec<&Field>,
+        variant_ident: Option<Ident>,
+    ) -> Result<IndexMap<AsyncDebugFieldIdent, AsyncDebugField>> {
         fields
             .into_iter()
             .cloned()
@@ -33,15 +36,15 @@ impl AsyncDebugField {
         let ident = field
             .ident
             .clone()
-            .map(|ident| -> Result<_> {
-                Ok(AsyncDebugFieldIdent::Ident(ident))
-            })
+            .map(|ident| -> Result<_> { Ok(AsyncDebugFieldIdent::Ident(ident)) })
             .unwrap_or_else(|| {
-                let index = index.try_into()
-                    .map_err(|e: TryFromIntError| {
-                        Error::new(field.span(), e.to_string())
-                    })?;
-                Ok(AsyncDebugFieldIdent::Index(Index { index, span: field.span() }))
+                let index = index
+                    .try_into()
+                    .map_err(|e: TryFromIntError| Error::new(field.span(), e.to_string()))?;
+                Ok(AsyncDebugFieldIdent::Index(Index {
+                    index,
+                    span: field.span(),
+                }))
             })?;
 
         Ok(Self {
