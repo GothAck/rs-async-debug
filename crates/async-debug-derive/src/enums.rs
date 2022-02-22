@@ -8,7 +8,7 @@ use syn::{
 
 use crate::{
     common::ErrorCallSite,
-    fields::{AsyncDebugFieldIdent, AsyncDebugFields, AsyncDebugFieldsMap},
+    fields::{AsyncDebugFields, AsyncDebugFieldsMap},
     Result,
 };
 
@@ -93,7 +93,7 @@ impl<'a> AsyncDebugEnum<'a> {
     //     Ok((names, types))
     // }
 
-    pub fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
+    pub fn to_token_stream_impl_ident_bodies(&self) -> Result<TokenStream> {
         self.variants
             .values()
             .map(|variant| variant.to_token_stream_impl_ident_body())
@@ -116,7 +116,7 @@ impl<'a> AsyncDebugEnum<'a> {
             impl #generics_impl AsyncDebug for #ident #generics_ty #where_clause {}
         };
 
-        let token_stream_impl_ident_body = self.to_token_stream_impl_ident_body()?;
+        let token_stream_impl_ident_bodies = self.to_token_stream_impl_ident_bodies()?;
 
         let ts_impl_ident = quote! {
             #[automatically_derived]
@@ -125,7 +125,7 @@ impl<'a> AsyncDebugEnum<'a> {
                 #where_clause
                 {
                     match self {
-                        #token_stream_impl_ident_body
+                        #token_stream_impl_ident_bodies
                     }
                 }
             }
@@ -192,17 +192,16 @@ impl AsyncDebugVariant {
     fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
         let ident = &self.variant.ident;
         let enum_debug_ident = &self.enum_debug_ident;
-        let (field_idents, field_ts): (Vec<&AsyncDebugFieldIdent>, TokenStream) = self
+        let field_idents = self
             .fields
-            .iter()
-            .map(|(ident, field)| field.to_token_stream(None).map(|ts| (ident, ts)))
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .unzip();
+            .keys()
+            .collect::<Vec<_>>();
+
+        let token_stream_impl_ident_body = <Self as AsyncDebugFields>::to_token_stream_impl_ident_body(self, None)?;
 
         Ok(quote! {
             Self::#ident { #(#field_idents),* } => #enum_debug_ident::#ident {
-                #field_ts
+                #token_stream_impl_ident_body
             },
         })
     }

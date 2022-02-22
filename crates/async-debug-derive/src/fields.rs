@@ -59,10 +59,10 @@ pub trait AsyncDebugFields {
             .collect()
     }
 
-    fn to_token_stream_impl_ident_body(&self) -> Result<TokenStream> {
+    fn to_token_stream_impl_ident_body(&self, prefix: Option<TokenStream>) -> Result<TokenStream> {
         self.get_fields()
             .values()
-            .map(|field| field.to_token_stream(Some(quote! { self. })))
+            .map(|field| field.to_token_stream(prefix.clone()))
             .collect()
     }
 }

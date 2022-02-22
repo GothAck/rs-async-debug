@@ -41,7 +41,7 @@ impl<'a> AsyncDebugStructUnnamed<'a> {
     pub fn to_token_stream(&self) -> Result<TokenStream> {
         let (new_generics_names, new_generics) = self.get_new_generics()?;
         let fields_type = self.get_fields_type();
-        let token_stream_impl_ident_body = self.to_token_stream_impl_ident_body()?;
+        let token_stream_impl_ident_body = self.to_token_stream_impl_ident_body(Some(quote! { self. }))?;
 
         let vis = &self.vis;
         let ident = &self.ident;
