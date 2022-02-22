@@ -3,9 +3,8 @@ use quote::quote;
 use syn::{DeriveInput, Field, ImplGenerics, TypeGenerics, Visibility, WhereClause};
 
 use crate::{
-    common::AsyncDebugCommon,
+    common::{prelude::*, AsyncDebugCommon},
     fields::{AsyncDebugFields, AsyncDebugFieldsMap},
-    Result,
 };
 
 pub struct AsyncDebugStructUnnamed<'a> {

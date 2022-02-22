@@ -3,8 +3,8 @@ use quote::{format_ident, quote};
 use syn::{Field, Variant};
 
 use crate::{
+    common::prelude::*,
     fields::{AsyncDebugFieldIdent, AsyncDebugFields, AsyncDebugFieldsMap},
-    Result,
 };
 
 pub struct AsyncDebugVariantUnnamed {

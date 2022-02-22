@@ -16,9 +16,7 @@ extern crate proc_macro;
 use proc_macro2::{Span, TokenStream};
 use syn::{parse2, Data, DataEnum, DataStruct, DeriveInput, Error};
 
-use self::{enums::AsyncDebugEnum, structs::AsyncDebugStruct};
-
-type Result<T> = std::result::Result<T, Error>;
+use self::{common::prelude::*, enums::AsyncDebugEnum, structs::AsyncDebugStruct};
 
 #[proc_macro_derive(AsyncDebug, attributes(async_debug))]
 /// `AsyncDebug` proc macro

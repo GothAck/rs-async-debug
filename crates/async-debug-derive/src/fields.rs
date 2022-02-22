@@ -5,7 +5,10 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, IdentFragment, ToTokens};
 use syn::{parse2, spanned::Spanned, Error, Field, GenericArgument, Index, Type};
 
-use crate::{common::AsyncDebug, zip_result::ZipResult, Result};
+use crate::{
+    common::{attr_prop::AsyncDebug, prelude::*},
+    zip_result::ZipResult,
+};
 
 pub type AsyncDebugFieldsMap = IndexMap<AsyncDebugFieldIdent, AsyncDebugField>;
 

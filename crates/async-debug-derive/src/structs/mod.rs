@@ -5,7 +5,7 @@ use proc_macro2::TokenStream;
 use syn::{DeriveInput, Error, Fields, FieldsNamed, FieldsUnnamed};
 
 use self::{named::AsyncDebugStructNamed, unnamed::AsyncDebugStructUnnamed};
-use super::{common::*, Result};
+use super::common::prelude::*;
 
 pub enum AsyncDebugStruct<'a> {
     Named(AsyncDebugStructNamed<'a>),
