@@ -34,11 +34,95 @@ error: async_call must be a path to a function
 15 |     mutex_u64: Mutex<u64>,
    |     ^^^^^^^^^
 
-error[E0599]: no method named `async_debug` found for struct `Mixed` in the current scope
-  --> tests/ui/fail/multi_error.rs:30:31
+error: skip can only be used alone
+  --> tests/ui/fail/multi_error.rs:24:9
    |
-5  | struct Mixed {
-   | ------------ method `async_debug` not found for this
+24 |         rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^
+
+error: clone and copy are mutually exclusive
+  --> tests/ui/fail/multi_error.rs:24:9
+   |
+24 |         rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^
+
+error: async_call must be a path to a function
+  --> tests/ui/fail/multi_error.rs:24:9
+   |
+24 |         rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^
+
+error: clone and copy are mutually exclusive
+  --> tests/ui/fail/multi_error.rs:26:9
+   |
+26 |         mutex: Mutex<Vec<u64>>,
+   |         ^^^^^
+
+error: skip can only be used alone
+  --> tests/ui/fail/multi_error.rs:28:9
+   |
+28 |         mutex_u128: Mutex<u128>,
+   |         ^^^^^^^^^^
+
+error: async_call must be a path to a function
+  --> tests/ui/fail/multi_error.rs:30:9
+   |
+30 |         mutex_u64: Mutex<u64>,
+   |         ^^^^^^^^^
+
+error: skip can only be used alone
+  --> tests/ui/fail/multi_error.rs:35:9
+   |
+35 |         v2_rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^^^^
+
+error: clone and copy are mutually exclusive
+  --> tests/ui/fail/multi_error.rs:35:9
+   |
+35 |         v2_rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^^^^
+
+error: async_call must be a path to a function
+  --> tests/ui/fail/multi_error.rs:35:9
+   |
+35 |         v2_rw_lock: RwLock<Vec<String>>,
+   |         ^^^^^^^^^^
+
+error: clone and copy are mutually exclusive
+  --> tests/ui/fail/multi_error.rs:37:9
+   |
+37 |         v2_mutex: Mutex<Vec<u64>>,
+   |         ^^^^^^^^
+
+error: skip can only be used alone
+  --> tests/ui/fail/multi_error.rs:39:9
+   |
+39 |         v2_mutex_u128: Mutex<u128>,
+   |         ^^^^^^^^^^^^^
+
+error: async_call must be a path to a function
+  --> tests/ui/fail/multi_error.rs:41:9
+   |
+41 |         v2_mutex_u64: Mutex<u64>,
+   |         ^^^^^^^^^^^^
+
+error[E0425]: cannot find value `enum_named_1` in this scope
+  --> tests/ui/fail/multi_error.rs:71:25
+   |
+71 |         format!("{:?}", enum_named_1.async_debug().await),
+   |                         ^^^^^^^^^^^^ help: a local variable with a similar name exists: `enum_named_v1`
+
+error[E0425]: cannot find value `enum_named_2` in this scope
+  --> tests/ui/fail/multi_error.rs:84:25
+   |
+84 |         format!("{:?}", enum_named_2.async_debug().await),
+   |                         ^^^^^^^^^^^^ help: a local variable with a similar name exists: `enum_named_v2`
+
+error[E0599]: no method named `async_debug` found for struct `StructNamed` in the current scope
+  --> tests/ui/fail/multi_error.rs:57:38
+   |
+5  | struct StructNamed {
+   | ------------------ method `async_debug` not found for this
 ...
-30 |         format!("{:?}", mixed.async_debug().await),
-   |                               ^^^^^^^^^^^ method not found in `Mixed`
+57 |         format!("{:?}", struct_named.async_debug().await),
+   |                                      ^^^^^^^^^^^ method not found in `StructNamed`

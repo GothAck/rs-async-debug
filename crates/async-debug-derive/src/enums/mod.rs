@@ -44,7 +44,7 @@ impl<'a> AsyncDebugEnum<'a> {
                     AsyncDebugVariant::new(variant.clone(), input.ident.clone())?,
                 ))
             })
-            .collect::<Result<IndexMap<_, _>>>()?;
+            .collect_syn_error()?;
 
         let (generics_impl, generics_ty, where_clause) = input.generics.split_for_impl();
 
