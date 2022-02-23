@@ -10,7 +10,7 @@ use syn::{
 };
 
 use crate::{
-    common::{prelude::*, AsyncDebugCommon},
+    common::{attr_struct_enum::AsyncDebug, prelude::*, AsyncDebugCommon},
     fields::AsyncDebugFields,
 };
 
@@ -24,6 +24,7 @@ pub struct AsyncDebugEnum<'a> {
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
     variants: IndexMap<Ident, AsyncDebugVariant>,
+    attr: AsyncDebug,
 }
 
 impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}
@@ -31,6 +32,7 @@ impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}
 impl<'a> AsyncDebugEnum<'a> {
     pub fn new(input: &'a DeriveInput, variants: Vec<Variant>) -> Result<Self> {
         let mod_ident = Self::get_async_debug_mod_ident(&input.ident);
+        let attr = Self::get_attr_struct_enum(&input.attrs)?;
 
         let variants = variants
             .iter()
@@ -54,6 +56,7 @@ impl<'a> AsyncDebugEnum<'a> {
             generics_ty,
             where_clause,
             variants,
+            attr,
         })
     }
 
@@ -120,9 +123,19 @@ impl<'a> AsyncDebugEnum<'a> {
             }
         };
 
+        let derive = {
+            if self.attr.disable_derive_debug.is_none() {
+                Some(quote! { #[derive(Debug)] })
+            } else {
+                None
+            }
+        };
+
         let ts_enum = quote! {
             #vis mod #mod_ident {
-                #[derive(Debug)]
+                use super::*;
+
+                #derive
                 #[allow(dead_code)]
                 #[allow(non_camel_case_types)]
                 #[automatically_derived]

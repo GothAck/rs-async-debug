@@ -3,7 +3,7 @@ use quote::quote;
 use syn::{DeriveInput, Field, ImplGenerics, TypeGenerics, Visibility, WhereClause};
 
 use crate::{
-    common::{prelude::*, AsyncDebugCommon},
+    common::{attr_struct_enum::AsyncDebug, prelude::*, AsyncDebugCommon},
     fields::{AsyncDebugFields, AsyncDebugFieldsMap},
 };
 
@@ -14,6 +14,7 @@ pub struct AsyncDebugStructUnnamed<'a> {
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
     fields: AsyncDebugFieldsMap,
+    attr: AsyncDebug,
 }
 
 impl<'a> AsyncDebugCommon for AsyncDebugStructUnnamed<'a> {}
@@ -29,6 +30,7 @@ impl<'a> AsyncDebugStructUnnamed<'a> {
         let (generics_impl, generics_ty, where_clause) = input.generics.split_for_impl();
 
         let fields = Self::convert_fields(fields, None)?;
+        let attr = Self::get_attr_struct_enum(&input.attrs)?;
 
         Ok(Self {
             vis: input.vis.clone(),
@@ -37,6 +39,7 @@ impl<'a> AsyncDebugStructUnnamed<'a> {
             generics_ty,
             where_clause,
             fields,
+            attr,
         })
     }
 
@@ -72,11 +75,19 @@ impl<'a> AsyncDebugStructUnnamed<'a> {
             }
         };
 
+        let derive = {
+            if self.attr.disable_derive_debug.is_none() {
+                Some(quote! { #[derive(Debug)] })
+            } else {
+                None
+            }
+        };
+
         let ts_struct = quote! {
             #vis mod #async_debug_mod_ident {
                 use super::*;
 
-                #[derive(Debug)]
+                #derive
                 #[allow(dead_code)]
                 #[allow(non_camel_case_types)]
                 #[automatically_derived]

@@ -129,3 +129,23 @@ fn test_skip() {
 
     file.write_all(fmt(output).as_bytes()).unwrap();
 }
+
+#[test]
+fn test_disable_derive_debug() {
+    let mut mint = Mint::new("tests/goldenfiles");
+    let mut file = mint.new_goldenfile("test_disable_derive_debug.rs").unwrap();
+
+    let input = quote! {
+        #[derive(AsyncDebug)]
+        #[async_debug(disable_derive_debug)]
+        struct Input {
+            test: String,
+            #[async_debug(skip)]
+            skipped: u64,
+        }
+    };
+
+    let output = async_debug_impl(input).unwrap();
+
+    file.write_all(fmt(output).as_bytes()).unwrap();
+}

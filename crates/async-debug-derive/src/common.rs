@@ -1,5 +1,8 @@
 use convert_case::{Case, Casing};
 use proc_macro2::Ident;
+use syn::Attribute;
+
+use self::{attr_struct_enum::AsyncDebug as AsyncDebugStructEnum, prelude::*};
 
 pub trait AsyncDebugCommon {
     fn get_async_debug_mod_ident(ident: &Ident) -> Ident {
@@ -7,6 +10,10 @@ pub trait AsyncDebugCommon {
             &format!("async_debug_{}", ident.to_string().to_case(Case::Snake)),
             ident.span(),
         )
+    }
+
+    fn get_attr_struct_enum(attrs: &[Attribute]) -> Result<AsyncDebugStructEnum> {
+        Ok(AsyncDebugStructEnum::try_from_attributes(attrs)?.unwrap_or_default())
     }
 }
 
@@ -43,6 +50,15 @@ pub mod attr_prop {
 
             Ok(())
         }
+    }
+}
+
+pub mod attr_struct_enum {
+    use bae::FromAttributes;
+
+    #[derive(FromAttributes, Default)]
+    pub struct AsyncDebug {
+        pub disable_derive_debug: Option<()>,
     }
 }
 
