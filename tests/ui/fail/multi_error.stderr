@@ -1,0 +1,32 @@
+error: skip can only be used alone
+ --> tests/ui/fail/multi_error.rs:9:5
+  |
+9 |     rw_lock: RwLock<Vec<String>>,
+  |     ^^^^^^^
+
+error: clone and copy are mutually exclusive
+  --> tests/ui/fail/multi_error.rs:11:5
+   |
+11 |     mutex: Mutex<Vec<u64>>,
+   |     ^^^^^
+
+error: skip can only be used alone
+  --> tests/ui/fail/multi_error.rs:13:5
+   |
+13 |     mutex_u128: Mutex<u128>,
+   |     ^^^^^^^^^^
+
+error: async_call must be a path to a function
+  --> tests/ui/fail/multi_error.rs:15:5
+   |
+15 |     mutex_u64: Mutex<u64>,
+   |     ^^^^^^^^^
+
+error[E0599]: no method named `async_debug` found for struct `Mixed` in the current scope
+  --> tests/ui/fail/multi_error.rs:30:31
+   |
+5  | struct Mixed {
+   | ------------ method `async_debug` not found for this
+...
+30 |         format!("{:?}", mixed.async_debug().await),
+   |                               ^^^^^^^^^^^ method not found in `Mixed`

@@ -27,7 +27,7 @@ pub trait AsyncDebugFields {
                 AsyncDebugField::new(field, variant_ident.clone(), index)
                     .map(|field| (field.ident.clone(), field))
             })
-            .collect::<Result<IndexMap<_, _>>>()
+            .collect_syn_error::<IndexMap<_, _>>()
     }
 
     fn get_new_generics(&self) -> Result<(Vec<GenericArgument>, Vec<GenericArgument>)> {

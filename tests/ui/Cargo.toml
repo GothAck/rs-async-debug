@@ -17,6 +17,10 @@ name = "fail_exclusive_clone_copy"
 path = "fail/exclusive_clone_copy.rs"
 
 [[bin]]
+name = "fail_multi_error"
+path = "fail/multi_error.rs"
+
+[[bin]]
 name = "fail_struct_unit"
 path = "fail/struct_unit.rs"
 
