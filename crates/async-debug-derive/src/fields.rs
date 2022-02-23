@@ -6,7 +6,7 @@ use quote::{format_ident, quote, IdentFragment, ToTokens};
 use syn::{parse2, spanned::Spanned, Error, Field, GenericArgument, Index, Type};
 
 use crate::{
-    common::{attr_prop::AsyncDebug, prelude::*},
+    common::{attr_prop::AsyncDebugAttrField, prelude::*},
     zip_result::ZipResult,
 };
 
@@ -87,7 +87,7 @@ pub struct AsyncDebugField {
     pub field: Field,
     pub variant_ident: Option<Ident>,
     pub ident: AsyncDebugFieldIdent,
-    pub attr: AsyncDebug,
+    pub attr: AsyncDebugAttrField,
 }
 
 impl AsyncDebugField {
@@ -106,7 +106,7 @@ impl AsyncDebugField {
                 }))
             })?;
 
-        let attr = AsyncDebug::try_from_attributes(&field.attrs)?.unwrap_or_default();
+        let attr = AsyncDebugAttrField::try_from_attributes(&field.attrs)?.unwrap_or_default();
 
         attr.validate(&field.ident)?;
 

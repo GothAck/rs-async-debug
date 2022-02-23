@@ -10,7 +10,7 @@ use syn::{
 };
 
 use crate::{
-    common::{attr_struct_enum::AsyncDebug, prelude::*, AsyncDebugCommon},
+    common::{attr_struct_enum::AsyncDebugAttrStructEnum, prelude::*, AsyncDebugCommon},
     fields::AsyncDebugFields,
 };
 
@@ -24,7 +24,7 @@ pub struct AsyncDebugEnum<'a> {
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
     variants: IndexMap<Ident, AsyncDebugVariant>,
-    attr: AsyncDebug,
+    attr: AsyncDebugAttrStructEnum,
 }
 
 impl<'a> AsyncDebugCommon for AsyncDebugEnum<'a> {}

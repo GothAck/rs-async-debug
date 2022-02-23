@@ -3,7 +3,7 @@ use quote::quote;
 use syn::{DeriveInput, Field, ImplGenerics, TypeGenerics, Visibility, WhereClause};
 
 use crate::{
-    common::{attr_struct_enum::AsyncDebug, prelude::*, AsyncDebugCommon},
+    common::{attr_struct_enum::AsyncDebugAttrStructEnum, prelude::*, AsyncDebugCommon},
     fields::{AsyncDebugFields, AsyncDebugFieldsMap},
 };
 
@@ -14,7 +14,7 @@ pub struct AsyncDebugStructUnnamed<'a> {
     generics_ty: TypeGenerics<'a>,
     where_clause: Option<&'a WhereClause>,
     fields: AsyncDebugFieldsMap,
-    attr: AsyncDebug,
+    attr: AsyncDebugAttrStructEnum,
 }
 
 impl<'a> AsyncDebugCommon for AsyncDebugStructUnnamed<'a> {}
