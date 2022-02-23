@@ -34,7 +34,7 @@ pub trait AsyncDebugFields {
         let (names, types): (Vec<GenericArgument>, Vec<Type>) = self
             .get_fields()
             .values()
-            .filter(|field| field.async_debug.skip.is_none())
+            .filter(|field| field.attr.skip.is_none())
             .map(|field| field.generic_argument().zip_result(field.ty()))
             .collect::<Result<Vec<_>>>()?
             .into_iter()
@@ -51,7 +51,7 @@ pub trait AsyncDebugFields {
     fn get_fields_type(&self) -> TokenStream {
         self.get_fields()
             .values()
-            .filter(|field| field.async_debug.skip.is_none())
+            .filter(|field| field.attr.skip.is_none())
             .map(|field| {
                 let ident = &field.ident;
                 let generic_argument = field.generic_argument_ident();
@@ -77,7 +77,7 @@ pub trait AsyncDebugFields {
     fn to_token_stream_impl_ident_body(&self, prefix: Option<TokenStream>) -> Result<TokenStream> {
         self.get_fields()
             .values()
-            .filter(|field| field.async_debug.skip.is_none())
+            .filter(|field| field.attr.skip.is_none())
             .map(|field| field.to_token_stream(prefix.clone()))
             .collect()
     }
@@ -87,8 +87,7 @@ pub struct AsyncDebugField {
     pub field: Field,
     pub variant_ident: Option<Ident>,
     pub ident: AsyncDebugFieldIdent,
-    pub async_debug_present: bool,
-    pub async_debug: AsyncDebug,
+    pub attr: AsyncDebug,
 }
 
 impl AsyncDebugField {
@@ -107,23 +106,20 @@ impl AsyncDebugField {
                 }))
             })?;
 
-        let (async_debug_present, async_debug) = AsyncDebug::try_from_attributes(&field.attrs)?
-            .map(|async_debug| (true, async_debug))
-            .unwrap_or_default();
+        let attr = AsyncDebug::try_from_attributes(&field.attrs)?.unwrap_or_default();
 
-        async_debug.validate(&field.ident)?;
+        attr.validate(&field.ident)?;
 
         Ok(Self {
             field,
             variant_ident,
             ident,
-            async_debug_present,
-            async_debug,
+            attr,
         })
     }
 
     pub fn ty(&self) -> Result<Type> {
-        if let Some(ty) = &self.async_debug.ty {
+        if let Some(ty) = &self.attr.ty {
             return Ok(ty.clone());
         }
         let ty = &self.field.ty;
@@ -131,7 +127,7 @@ impl AsyncDebugField {
     }
 
     pub fn custom_type(&self) -> bool {
-        self.async_debug.ty.is_some()
+        self.attr.ty.is_some()
     }
 
     pub fn generic_argument_ident(&self) -> Ident {
@@ -163,13 +159,13 @@ impl AsyncDebugField {
 
         let mut ts = quote! { #prefix #ts_ident };
 
-        if let Some(async_call) = &self.async_debug.async_call {
+        if let Some(async_call) = &self.attr.async_call {
             ts = quote! { #async_call(&#ts).await };
         }
 
-        if self.async_debug.copy.is_some() {
+        if self.attr.copy.is_some() {
             ts = quote! { *#ts };
-        } else if self.async_debug.clone.is_some() {
+        } else if self.attr.clone.is_some() {
             ts = quote! { #ts.clone() }
         }
 
