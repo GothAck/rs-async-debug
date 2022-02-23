@@ -5,6 +5,18 @@ error: skip can only be used alone
   |     ^^^^^^^
 
 error: clone and copy are mutually exclusive
+ --> tests/ui/fail/multi_error.rs:9:5
+  |
+9 |     rw_lock: RwLock<Vec<String>>,
+  |     ^^^^^^^
+
+error: async_call must be a path to a function
+ --> tests/ui/fail/multi_error.rs:9:5
+  |
+9 |     rw_lock: RwLock<Vec<String>>,
+  |     ^^^^^^^
+
+error: clone and copy are mutually exclusive
   --> tests/ui/fail/multi_error.rs:11:5
    |
 11 |     mutex: Mutex<Vec<u64>>,

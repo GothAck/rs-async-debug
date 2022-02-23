@@ -35,29 +35,34 @@ pub mod attr_prop {
 
     impl AsyncDebug {
         pub fn validate(&self, spanned: &impl Spanned) -> Result<()> {
+            let mut res = Vec::new();
+
             if self.skip.is_some()
                 && (self.async_call.is_some() || self.clone.is_some() || self.copy.is_some())
             {
-                return Err(Error::new(spanned.span(), "skip can only be used alone"));
+                res.push(Err(Error::new(
+                    spanned.span(),
+                    "skip can only be used alone",
+                )));
             }
 
             if self.clone.is_some() && self.copy.is_some() {
-                return Err(Error::new(
+                res.push(Err(Error::new(
                     spanned.span(),
                     "clone and copy are mutually exclusive",
-                ));
+                )));
             }
 
             if let Some(async_call) = &self.async_call {
                 if !matches!(async_call, Expr::Path(_)) {
-                    return Err(Error::new(
+                    res.push(Err(Error::new(
                         spanned.span(),
                         "async_call must be a path to a function",
-                    ));
+                    )));
                 }
             }
 
-            Ok(())
+            res.into_iter().collect_syn_error()
         }
     }
 
